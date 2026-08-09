@@ -1,4 +1,4 @@
-# Figma AI Design Prompts — HantiFlow Pro (34 screens)
+# Figma AI Design Prompts — Hantistock (34 screens)
 
 Copy-paste one prompt at a time into Figma AI (First Draft / Make). Each prompt is self-contained — it repeats the style cues every time, since AI design generators don't reliably carry style over between separate prompts. Every field/column/button named below is taken directly from the real, already-built page, so the resulting design will accurately represent the actual system — not an invented one.
 
@@ -12,7 +12,7 @@ Copy-paste one prompt at a time into Figma AI (First Draft / Make). Each prompt 
 
 Paste this at the start of every desktop prompt (or save it as a Figma AI "style reference" if the tool supports one):
 
-> Modern professional B2B SaaS web app, light theme, desktop, 1440×900 canvas. Primary accent: deep indigo #4F46E5. Page background: very light gray #F8F9FB. Cards: white, 10px rounded corners, soft subtle drop shadow. Typography: Inter or similar clean sans-serif — bold 20–24px page titles, 14px body text, 12px muted gray captions. Tables: white background, light-gray header row, subtle row dividers, row hover highlight. Status badges: small pill shapes, color-coded — green for active/success/approved/completed, red for destructive/suspended/rejected/failed, gray for neutral/pending, amber for warning. Buttons: primary = solid indigo fill with white text and rounded corners; secondary = white with gray outline; destructive = red. Left sidebar navigation, 240px wide, grouped into labeled sections with icon + label nav items, current page highlighted in indigo. Top header bar, 64px tall: app name "HantiFlow Pro" on the left, a notification bell icon and a circular user avatar with dropdown on the right.
+> Modern professional B2B SaaS web app, light theme, desktop, 1440×900 canvas. Primary accent: deep indigo #4F46E5. Page background: very light gray #F8F9FB. Cards: white, 10px rounded corners, soft subtle drop shadow. Typography: Inter or similar clean sans-serif — bold 20–24px page titles, 14px body text, 12px muted gray captions. Tables: white background, light-gray header row, subtle row dividers, row hover highlight. Status badges: small pill shapes, color-coded — green for active/success/approved/completed, red for destructive/suspended/rejected/failed, gray for neutral/pending, amber for warning. Buttons: primary = solid indigo fill with white text and rounded corners; secondary = white with gray outline; destructive = red. Left sidebar navigation, 240px wide, grouped into labeled sections with icon + label nav items, current page highlighted in indigo. Top header bar, 64px tall: app name "Hantistock" on the left, a notification bell icon and a circular user avatar with dropdown on the right.
 
 For the **customer/supplier portal** prompts, replace "left sidebar navigation" with: *a simple top header bar containing the app name, a row of horizontal text nav links, a notification bell, and a user avatar — no sidebar.*
 
@@ -25,7 +25,7 @@ For the **driver portal** prompts, use this mobile style block instead:
 ## A. Authentication
 
 ### A1. Login
-Design a centered, minimal login screen. A small white card (max 400px wide) vertically centered on the page, with: app title "Sign in to HantiFlow Pro", a short description line, an "Email or username" input, a "Password" input, a full-width primary "Sign in" button, and a small text link below: "Don't have an account? Register". No sidebar, no header — just the centered card on the light-gray background.
+Design a centered, minimal login screen. A small white card (max 400px wide) vertically centered on the page, with: app title "Sign in to Hantistock", a short description line, an "Email or username" input, a "Password" input, a full-width primary "Sign in" button, and a small text link below: "Don't have an account? Register". No sidebar, no header — just the centered card on the light-gray background.
 
 ### A2. Register
 Design a centered account-creation screen, same card style as the login screen (max 420px wide). Header: "Create your account" + description. Form fields top-to-bottom: Full name, Email, Username (optional, with small helper text "Lets you sign in with a username instead of your email"), Phone (optional), Password (helper text "min 8 characters"). Full-width primary "Create account" button, and a text link below: "Already have an account? Sign in".

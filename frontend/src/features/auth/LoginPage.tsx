@@ -58,7 +58,7 @@ export function LoginPage() {
             <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-foreground/10 p-1.5 ring-1 ring-sidebar-foreground/20">
               <img src="/favicon.png" alt="" className="size-full object-contain" />
             </div>
-            <span className="text-xl font-bold tracking-tight">HantiFlow Pro</span>
+            <span className="text-xl font-bold tracking-tight">Hantistock</span>
           </div>
           <div>
             <h1 className="text-4xl font-bold leading-tight tracking-tight">
@@ -77,7 +77,7 @@ export function LoginPage() {
             </ul>
           </div>
           <p className="text-sm text-sidebar-foreground/40">
-            © {new Date().getFullYear()} HantiFlow Pro. All rights reserved.
+            © {new Date().getFullYear()} Hantistock. All rights reserved.
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ export function LoginPage() {
         {/* Mobile logo */}
         <div className="mb-8 flex items-center gap-3 lg:hidden">
           <img src="/favicon.png" alt="" className="size-9 object-contain" />
-          <span className="text-xl font-bold tracking-tight">HantiFlow Pro</span>
+          <span className="text-xl font-bold tracking-tight">Hantistock</span>
         </div>
 
         <div className="w-full max-w-sm">

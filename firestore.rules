@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// HantiFlow Pro: all reads/writes go through the Express backend using the
+// Hantistock: all reads/writes go through the Express backend using the
 // Firebase Admin SDK, which bypasses these rules entirely. This file is a
 // deny-by-default safety net in case a client ever tries to hit Firestore
 // directly with the client SDK and a leaked/forged credential.

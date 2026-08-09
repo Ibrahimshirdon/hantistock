@@ -15,8 +15,8 @@ export default defineConfig({
       // opt-in per route, not applied automatically. Live data always
       // still comes straight from the network.
       manifest: {
-        name: "HantiFlow Pro",
-        short_name: "HantiFlow Pro",
+        name: "Hantistock",
+        short_name: "Hantistock",
         description: "Cloud-based inventory, sales, delivery, and business management system.",
         start_url: "/",
         display: "standalone",

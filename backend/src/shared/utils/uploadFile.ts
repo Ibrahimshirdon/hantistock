@@ -11,7 +11,7 @@ export function uploadBuffer(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: `hantiflow-pro/${folder}`, resource_type: resourceType },
+      { folder: `hantistock/${folder}`, resource_type: resourceType },
       (error, result) => {
         if (error || !result) return reject(error ?? new Error("Cloudinary upload failed"));
         resolve(result.secure_url);

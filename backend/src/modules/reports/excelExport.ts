@@ -16,7 +16,7 @@ export async function generateSalesReportExcel(
   const workbook = new ExcelJS.Workbook();
 
   const summarySheet = workbook.addWorksheet("Summary");
-  summarySheet.addRow(["HantiFlow Pro - Sales Report"]);
+  summarySheet.addRow(["Hantistock - Sales Report"]);
   summarySheet.addRow([`${range.dateFrom} to ${range.dateTo}`]);
   summarySheet.addRow([]);
   summarySheet.addRow(["Orders", summary.orderCount]);
@@ -52,7 +52,7 @@ export async function generateInventoryReportExcel(
   const workbook = new ExcelJS.Workbook();
 
   const summarySheet = workbook.addWorksheet("Summary");
-  summarySheet.addRow(["HantiFlow Pro - Inventory Report"]);
+  summarySheet.addRow(["Hantistock - Inventory Report"]);
   summarySheet.addRow([new Date().toLocaleDateString()]);
   summarySheet.addRow([]);
   summarySheet.addRow(["Total products", summary.totalProducts]);

@@ -1,4 +1,4 @@
-# HantiFlow Pro — System Design
+# Hantistock — System Design
 
 This document is generated from the actual implemented system (not a pre-build plan), so every entity, route, and relationship below is traceable to a real file in this repository. File references are given so each diagram can be cited in the thesis text.
 
@@ -10,7 +10,7 @@ This document is generated from the actual implemented system (not a pre-build p
 
 ## 1. User Roles
 
-HantiFlow Pro has six roles, enforced on every backend route via `verifyToken` + `requireRole([...])` middleware (`backend/src/middleware/`):
+Hantistock has six roles, enforced on every backend route via `verifyToken` + `requireRole([...])` middleware (`backend/src/middleware/`):
 
 | Role | Description |
 |---|---|
@@ -155,7 +155,7 @@ flowchart TB
     FireAuth[("Firebase Authentication")]
     CDN[("Cloudinary")]
 
-    Sys((0\nHantiFlow Pro\nSystem))
+    Sys((0\nHantistock\nSystem))
 
     StaffSide -- "credentials, product/order/stock data,\napprovals, reports requests" --> Sys
     Sys -- "dashboards, reports, notifications" --> StaffSide
@@ -485,7 +485,7 @@ No browser-automation or design tool (Figma, screenshot capture) was available i
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  HantiFlow Pro                              🔔 Notif   👤 User  │  ← header (h-16)
+│  Hantistock                              🔔 Notif   👤 User  │  ← header (h-16)
 ├───────────────┬───────────────────────────────────────────────────┤
 │ OVERVIEW      │  Welcome back, {name}                            │
 │  Dashboard    │  Signed in as {role}                             │
@@ -533,7 +533,7 @@ No browser-automation or design tool (Figma, screenshot capture) was available i
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  HantiFlow Pro · Shop      Shop  Orders  Wallet     🔔  👤      │  ← PortalLayout header/nav
+│  Hantistock · Shop      Shop  Orders  Wallet     🔔  👤      │  ← PortalLayout header/nav
 ├─────────────────────────────────────────────────────────────────┤
 │  [Search products______]                       [Category ▾]    │
 │  ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐                    │
@@ -550,7 +550,7 @@ No browser-automation or design tool (Figma, screenshot capture) was available i
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ HantiFlow Pro · Supplier   Dashboard Companies Products          │
+│ Hantistock · Supplier   Dashboard Companies Products          │
 │                             Stock Requests          🔔   👤     │
 ├─────────────────────────────────────────────────────────────────┤
 │  Supplier KPIs: catalog size, pending stock requests, etc.       │
@@ -565,7 +565,7 @@ No browser-automation or design tool (Figma, screenshot capture) was available i
 ```
 ┌─────────────────────────────────────────┐
 │                                           │
-│              HantiFlow Pro               │
+│              Hantistock               │
 │                                           │
 │   Email or username  [_______________]   │
 │   Password           [_______________]   │

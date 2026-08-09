@@ -536,7 +536,7 @@ function ReceiptPaper({
       )}
       <div className="flex flex-col items-center gap-1 pb-3 text-center">
         <img src="/favicon.png" alt="" className="size-12 object-contain" />
-        <p className="text-sm font-bold tracking-[0.2em] uppercase">HantiFlow Pro</p>
+        <p className="text-sm font-bold tracking-[0.2em] uppercase">Hantistock</p>
       </div>
       <div className="border-t-2" style={{ borderColor: "#111827" }} />
       <div className="flex flex-col gap-0.5 py-3">

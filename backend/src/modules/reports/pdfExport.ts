@@ -12,7 +12,7 @@ function streamToBuffer(doc: PDFKit.PDFDocument): Promise<Buffer> {
 }
 
 function drawHeader(doc: PDFKit.PDFDocument, title: string, subtitle: string) {
-  doc.fontSize(18).font("Helvetica-Bold").text("HantiFlow Pro", { align: "left" });
+  doc.fontSize(18).font("Helvetica-Bold").text("Hantistock", { align: "left" });
   doc.fontSize(14).font("Helvetica-Bold").text(title);
   doc.fontSize(10).font("Helvetica").fillColor("#666666").text(subtitle);
   doc.fillColor("#000000").moveDown(1);

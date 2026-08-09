@@ -95,7 +95,7 @@ async function autoCreateStockRequest(
     }),
     recordAuditLog({
       userId: "system",
-      userName: "system@hantiflow.pro",
+      userName: "system@hantistock.pro",
       role: "admin" as UserRole,
       action: "STOCK_REQUEST_AUTO_CREATED",
       entityType: "stockRequest",

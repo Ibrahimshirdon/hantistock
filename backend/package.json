@@ -1,7 +1,7 @@
 {
-  "name": "hantiflow-pro-backend",
+  "name": "hantistock-backend",
   "version": "1.0.0",
-  "description": "HantiFlow Pro - Inventory, Wholesale, Sales, Delivery & Business Management System (API)",
+  "description": "Hantistock - Inventory, Wholesale, Sales, Delivery & Business Management System (API)",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
