@@ -35,7 +35,7 @@ app.use(
     origin:
       env.nodeEnv === "development"
         ? (origin, callback) => callback(null, !origin || LOCALHOST_ORIGIN.test(origin))
-        : env.corsOrigin,
+        : (origin, callback) => callback(null, !origin || env.corsOrigins.includes(origin)),
     credentials: true,
   }),
 );
