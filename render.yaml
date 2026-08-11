@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: hantiflow-pro-api
+    name: hantistock-api
     runtime: node
     rootDir: backend
     plan: free
