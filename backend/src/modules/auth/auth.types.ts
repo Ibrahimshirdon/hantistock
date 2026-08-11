@@ -42,6 +42,7 @@ export const updateMyProfileSchema = z.object({
   displayName: z.string().min(2).optional(),
   phone: z.string().optional(),
   username: usernameSchema.optional(),
+  email: z.string().email().optional(),
 });
 export type UpdateMyProfileInput = z.infer<typeof updateMyProfileSchema>;
 

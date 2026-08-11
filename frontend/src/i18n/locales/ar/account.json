@@ -9,6 +9,8 @@
   "profile": {
     "title": "الملف الشخصي",
     "email": "البريد الإلكتروني",
+    "emailHint": "تغيير بريدك الإلكتروني يتطلب تأكيد كلمة المرور الحالية أدناه.",
+    "currentPasswordLabel": "كلمة المرور الحالية",
     "name": "الاسم",
     "username": "اسم المستخدم",
     "usernamePlaceholder": "غير محدد — يمكنك تسجيل الدخول بالبريد الإلكتروني فقط",
@@ -46,6 +48,7 @@
   },
   "toasts": {
     "profileUpdated": "تم تحديث الملف الشخصي",
+    "emailChangeWrongPassword": "كلمة المرور الحالية غير صحيحة",
     "photoUpdated": "تم تحديث صورة الملف الشخصي",
     "passwordChanged": "تم تغيير كلمة المرور"
   }

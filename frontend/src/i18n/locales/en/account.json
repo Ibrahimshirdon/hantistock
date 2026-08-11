@@ -9,6 +9,8 @@
   "profile": {
     "title": "Profile",
     "email": "Email",
+    "emailHint": "Changing your email requires confirming your current password below.",
+    "currentPasswordLabel": "Current password",
     "name": "Name",
     "username": "Username",
     "usernamePlaceholder": "Not set — you can only sign in with email",
@@ -46,6 +48,7 @@
   },
   "toasts": {
     "profileUpdated": "Profile updated",
+    "emailChangeWrongPassword": "Current password is incorrect",
     "photoUpdated": "Profile photo updated",
     "passwordChanged": "Password changed"
   }

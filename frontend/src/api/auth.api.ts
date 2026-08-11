@@ -89,6 +89,7 @@ export interface UpdateMyProfileInput {
   displayName?: string;
   phone?: string;
   username?: string;
+  email?: string;
 }
 
 export async function updateMyProfile(input: UpdateMyProfileInput) {

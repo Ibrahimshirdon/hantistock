@@ -45,17 +45,41 @@ export function AccountSettingsPage() {
 
   const [displayName, setDisplayName] = useState(profile?.displayName ?? "");
   const [username, setUsername] = useState(profile?.username ?? "");
+  const [email, setEmail] = useState(profile?.email ?? "");
+  const [emailConfirmPassword, setEmailConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const emailChanged = email.trim().toLowerCase() !== (profile?.email ?? "").toLowerCase();
+
   const profileMutation = useMutation({
-    mutationFn: () => updateMyProfile({ displayName, username: username || undefined }),
+    mutationFn: async () => {
+      if (emailChanged) {
+        if (!firebaseUser?.email) throw new Error("Not signed in");
+        const credential = EmailAuthProvider.credential(firebaseUser.email, emailConfirmPassword);
+        await reauthenticateWithCredential(firebaseUser, credential);
+      }
+      return updateMyProfile({
+        displayName,
+        username: username || undefined,
+        email: emailChanged ? email.trim() : undefined,
+      });
+    },
     onSuccess: async () => {
       toast.success(t("toasts.profileUpdated"));
+      setEmailConfirmPassword("");
+      if (emailChanged) await firebaseUser?.reload();
       await refreshProfile();
     },
-    onError: (error) => toast.error(getApiErrorMessage(error)),
+    onError: (error) => {
+      const code = (error as { code?: string }).code;
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+        toast.error(t("toasts.emailChangeWrongPassword"));
+      } else {
+        toast.error(getApiErrorMessage(error));
+      }
+    },
   });
 
   const photoMutation = useMutation({
@@ -131,7 +155,8 @@ export function AccountSettingsPage() {
               const file = e.target.files?.[0];
               if (file) photoMutation.mutate(file);
             }}
-          />
+          />\
+          
           <Button
             variant="outline"
             disabled={photoMutation.isPending}
@@ -149,8 +174,25 @@ export function AccountSettingsPage() {
         <CardContent className="flex flex-col gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email">{t("profile.email")}</Label>
-            <Input id="email" value={profile.email} disabled />
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {emailChanged && <p className="text-xs text-muted-foreground">{t("profile.emailHint")}</p>}
           </div>
+          {emailChanged && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="emailConfirmPassword">{t("profile.currentPasswordLabel")}</Label>
+              <Input
+                id="emailConfirmPassword"
+                type="password"
+                value={emailConfirmPassword}
+                onChange={(e) => setEmailConfirmPassword(e.target.value)}
+              />
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="displayName">{t("profile.name")}</Label>
             <Input
@@ -171,7 +213,12 @@ export function AccountSettingsPage() {
           </div>
           <Button
             className="w-fit"
-            disabled={profileMutation.isPending || !displayName}
+            disabled={
+              profileMutation.isPending ||
+              !displayName ||
+              !email ||
+              (emailChanged && !emailConfirmPassword)
+            }
             onClick={() => profileMutation.mutate()}
           >
             {profileMutation.isPending ? t("profile.saving") : t("profile.save")}

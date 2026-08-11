@@ -244,11 +244,18 @@ export async function updateMyProfile(uid: string, input: UpdateMyProfileInput) 
   if (!snap.exists) {
     throw new AppError(404, "User profile not found");
   }
+  const current = snap.data() as UserDoc;
 
   const updates: Record<string, unknown> = { ...input, updatedAt: FieldValue.serverTimestamp() };
   if (input.username) {
     await assertUsernameAvailable(input.username, uid);
     updates.username = normalizeUsername(input.username);
+  }
+  if (input.email && input.email !== current.email) {
+    await assertEmailAvailable(input.email);
+    await auth.updateUser(uid, { email: input.email });
+  } else {
+    delete updates.email;
   }
 
   await ref.update(updates);

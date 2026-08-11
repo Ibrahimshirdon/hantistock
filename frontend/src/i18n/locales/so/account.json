@@ -9,6 +9,8 @@
   "profile": {
     "title": "Profile-ka",
     "email": "Iimaylka",
+    "emailHint": "Bedelka iimaylkaaga wuxuu u baahan yahay inaad xaqiijiso furahaaga sirta ah ee hadda hoos ku qoran.",
+    "currentPasswordLabel": "Furaha sirta ah ee hadda",
     "name": "Magaca",
     "username": "Magaca isticmaale",
     "usernamePlaceholder": "Lama dejin — waxaad ku geli kartaa keliya iimaylka",
@@ -46,6 +48,7 @@
   },
   "toasts": {
     "profileUpdated": "Profile-ka waa la cusboonaysiiyay",
+    "emailChangeWrongPassword": "Furaha sirta ah ee hadda waa qalad",
     "photoUpdated": "Sawirka profile-ka waa la cusboonaysiiyay",
     "passwordChanged": "Furaha sirta ah waa la beddelay"
   }
