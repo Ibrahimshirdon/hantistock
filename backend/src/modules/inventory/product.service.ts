@@ -106,7 +106,9 @@ export async function uploadProductImage(id: string, fileBuffer: Buffer) {
     throw new AppError(404, "Product not found");
   }
   const url = await uploadBuffer(fileBuffer, { folder: "products", resourceType: "image" });
-  await ref.update({ images: FieldValue.arrayUnion(url), updatedAt: FieldValue.serverTimestamp() });
+  // Every screen displays images[0] as the one current photo (no gallery UI
+  // exists), so a re-upload must replace it, not accumulate via arrayUnion.
+  await ref.update({ images: [url], updatedAt: FieldValue.serverTimestamp() });
   return { url };
 }
 
