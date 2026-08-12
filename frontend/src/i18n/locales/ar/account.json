@@ -31,6 +31,34 @@
     "weakError": "كلمة المرور الجديدة ضعيفة جدًا (6 أحرف على الأقل)",
     "genericError": "تعذّر تغيير كلمة المرور. حاول مرة أخرى."
   },
+  "twoFactor": {
+    "title": "المصادقة الثنائية",
+    "enabledDescription": "مفعّلة — يتطلب تسجيل الدخول أيضًا بصمتك أو Face unlock أو رمزًا احتياطيًا.",
+    "disabledDescription": "أضف جهازًا أدناه لتطلب بصمتك أو Face unlock عند تسجيل الدخول، إضافة إلى كلمة المرور.",
+    "addedOn": "أُضيف بتاريخ {{date}}",
+    "deviceNameLabel": "اسم الجهاز",
+    "deviceNamePlaceholder": "مثال: حاسوبي المحمول",
+    "addDevice": "إضافة هذا الجهاز",
+    "adding": "جارٍ الإضافة...",
+    "backupCodes": "الرموز الاحتياطية",
+    "backupCodesRemaining": "{{count}} رمز غير مستخدم",
+    "generateBackupCodes": "إنشاء رموز احتياطية",
+    "backupCodesDialogTitle": "رموزك الاحتياطية",
+    "backupCodesDialogDescription": "كل رمز يعمل مرة واحدة فقط، لاستخدامه عند عدم توفر جهازك. احفظها في مكان آمن — لن تُعرض مرة أخرى.",
+    "copyCodes": "نسخ الرموز",
+    "disable": "تعطيل المصادقة الثنائية",
+    "confirmPasswordToDisable": "أكّد كلمة المرور الحالية للتعطيل",
+    "confirmDisable": "تعطيل المصادقة الثنائية",
+    "disabling": "جارٍ التعطيل...",
+    "cancel": "إلغاء",
+    "wrongPassword": "كلمة المرور الحالية غير صحيحة",
+    "toasts": {
+      "deviceAdded": "تمت إضافة الجهاز",
+      "deviceRemoved": "تمت إزالة الجهاز",
+      "disabled": "تم تعطيل المصادقة الثنائية",
+      "codesCopied": "تم نسخ الرموز الاحتياطية"
+    }
+  },
   "appearance": {
     "title": "المظهر",
     "currentlyUsing": "أنت تستخدم حاليًا الوضع {{mode}}.",

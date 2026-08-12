@@ -13,45 +13,73 @@ import {
 } from "@/api/auth.api";
 import type { UserProfile } from "@/types/auth.types";
 
+interface LoginResult {
+  profile: UserProfile;
+  mfaSatisfied: boolean;
+}
+
 interface AuthContextValue {
   firebaseUser: FirebaseUser | null;
   profile: UserProfile | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<UserProfile>;
+  // False only for an admin with 2FA enabled whose current session hasn't
+  // completed a WebAuthn/backup-code challenge yet — every other role, and
+  // an admin without 2FA enabled, is always true.
+  mfaSatisfied: boolean;
+  login: (email: string, password: string) => Promise<LoginResult>;
   registerCustomer: (input: RegisterCustomerInput) => Promise<UserProfile>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  completeMfaChallenge: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+async function computeMfaSatisfied(user: FirebaseUser, profile: UserProfile | null) {
+  if (!profile || profile.role !== "admin" || !profile.mfaEnabled) return true;
+  const result = await user.getIdTokenResult();
+  return Boolean(result.claims.mfaVerifiedAt);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mfaSatisfied, setMfaSatisfied] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
       setFirebaseUser(user);
       if (user) {
         try {
-          setProfile(await getMe());
+          const userProfile = await getMe();
+          setProfile(userProfile);
+          setMfaSatisfied(await computeMfaSatisfied(user, userProfile));
         } catch {
           setProfile(null);
+          setMfaSatisfied(true);
         }
       } else {
         setProfile(null);
+        setMfaSatisfied(true);
       }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
-  async function login(email: string, password: string) {
-    await signInWithEmailAndPassword(firebaseAuth, email, password);
+  async function login(email: string, password: string): Promise<LoginResult> {
+    const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
     const userProfile = await getMe();
     setProfile(userProfile);
-    return userProfile;
+    const satisfied = await computeMfaSatisfied(credential.user, userProfile);
+    setMfaSatisfied(satisfied);
+    return { profile: userProfile, mfaSatisfied: satisfied };
+  }
+
+  async function completeMfaChallenge() {
+    await firebaseUser?.getIdToken(true);
+    setMfaSatisfied(true);
   }
 
   async function registerCustomer(input: RegisterCustomerInput) {
@@ -72,7 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ firebaseUser, profile, loading, login, registerCustomer, logout, refreshProfile }}
+      value={{
+        firebaseUser,
+        profile,
+        loading,
+        mfaSatisfied,
+        login,
+        registerCustomer,
+        logout,
+        refreshProfile,
+        completeMfaChallenge,
+      }}
     >
       {children}
     </AuthContext.Provider>

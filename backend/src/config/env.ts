@@ -24,6 +24,13 @@ export const env = {
     line1: process.env.STORE_PICKUP_LINE1 ?? "Store address not configured",
     city: process.env.STORE_PICKUP_CITY ?? "—",
   },
+  // WebAuthn credentials are bound to the RP ID (bare domain, no scheme) they
+  // were registered against, so this must match whatever origin the admin
+  // actually logs in from — override via env var if the domain changes again.
+  webauthn: {
+    rpId: process.env.WEBAUTHN_RP_ID ?? (process.env.NODE_ENV === "production" ? "hantistock.vercel.app" : "localhost"),
+    rpName: "Hantistock",
+  },
   firebase: {
     projectId: required("FIREBASE_PROJECT_ID"),
     clientEmail: required("FIREBASE_CLIENT_EMAIL"),

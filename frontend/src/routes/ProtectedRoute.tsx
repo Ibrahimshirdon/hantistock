@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
-  const { firebaseUser, profile, loading } = useAuth();
+  const { firebaseUser, profile, loading, mfaSatisfied } = useAuth();
 
   if (loading) {
     return (
@@ -19,6 +19,10 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (!firebaseUser || !profile) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!mfaSatisfied) {
+    return <Navigate to="/mfa-challenge" replace />;
   }
 
   if (!allowedRoles.includes(profile.role)) {

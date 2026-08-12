@@ -10,6 +10,7 @@ import { PageLoader } from "@/components/shared/PageLoader";
 
 // Auth pages — small, always needed, keep eager
 import { LoginPage } from "@/features/auth/LoginPage";
+import { MfaChallengePage } from "@/features/auth/MfaChallengePage";
 
 // Layouts — needed before any page renders, keep eager
 import { DashboardLayout } from "@/layouts/DashboardLayout";
@@ -81,6 +82,7 @@ export default function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/mfa-challenge" element={<MfaChallengePage />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
 
               <Route element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]} />}>

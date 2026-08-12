@@ -15,6 +15,12 @@ export interface UserDoc {
   // button and the face kiosk work) — this is an opt-in restriction, not a
   // default lockout.
   attendanceMethod?: "face" | "manual";
+  // Whether this user has enrolled a WebAuthn device (fingerprint/Face
+  // unlock) as a required second login factor. Undefined/false means no
+  // second factor is required yet — set true only once a credential is
+  // successfully registered, so enrollment can never leave the account
+  // locked out mid-setup.
+  mfaEnabled?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

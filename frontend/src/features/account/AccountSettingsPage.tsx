@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import type { SupportedLanguage } from "@/i18n";
+import { TwoFactorAuthCard } from "./TwoFactorAuthCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -267,6 +268,8 @@ export function AccountSettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {profile.role === "admin" && <TwoFactorAuthCard />}
 
       <Card>
         <CardHeader>

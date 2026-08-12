@@ -31,6 +31,35 @@
     "weakError": "New password is too weak (minimum 6 characters)",
     "genericError": "Could not change password. Please try again."
   },
+  "twoFactor": {
+    "title": "Two-factor authentication",
+    "enabledDescription": "Enabled — signing in also requires your fingerprint, Face unlock, or a backup code.",
+    "disabledDescription": "Add a device below to require your fingerprint or Face unlock at login, on top of your password.",
+    "addedOn": "Added {{date}}",
+    "deviceNameLabel": "Device name",
+    "deviceNamePlaceholder": "e.g. My laptop",
+    "addDevice": "Add this device",
+    "adding": "Adding...",
+    "backupCodes": "Backup codes",
+    "backupCodesRemaining": "{{count}} unused code",
+    "backupCodesRemaining_other": "{{count}} unused codes",
+    "generateBackupCodes": "Generate backup codes",
+    "backupCodesDialogTitle": "Your backup codes",
+    "backupCodesDialogDescription": "Each code works once, for when your device isn't available. Save these somewhere safe — they won't be shown again.",
+    "copyCodes": "Copy codes",
+    "disable": "Disable two-factor authentication",
+    "confirmPasswordToDisable": "Confirm your current password to disable",
+    "confirmDisable": "Disable two-factor authentication",
+    "disabling": "Disabling...",
+    "cancel": "Cancel",
+    "wrongPassword": "Current password is incorrect",
+    "toasts": {
+      "deviceAdded": "Device added",
+      "deviceRemoved": "Device removed",
+      "disabled": "Two-factor authentication disabled",
+      "codesCopied": "Backup codes copied"
+    }
+  },
   "appearance": {
     "title": "Appearance",
     "currentlyUsing": "Currently using {{mode}} mode.",

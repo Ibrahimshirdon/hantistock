@@ -36,8 +36,8 @@ export function LoginPage() {
       const email = identifier.includes("@")
         ? identifier
         : (await resolveLoginIdentifier(identifier)).email;
-      const profile = await login(email, password);
-      navigate(ROLE_HOME_ROUTE[profile.role]);
+      const { profile, mfaSatisfied } = await login(email, password);
+      navigate(mfaSatisfied ? ROLE_HOME_ROUTE[profile.role] : "/mfa-challenge");
     } catch (error) {
       toast.error(
         error instanceof FirebaseError ? getAuthErrorMessage(error) : getApiErrorMessage(error),

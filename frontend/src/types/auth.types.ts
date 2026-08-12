@@ -17,6 +17,7 @@ export interface UserDoc {
   status: "active" | "suspended";
   photoURL?: string;
   attendanceMethod?: "face" | "manual";
+  mfaEnabled?: boolean;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 }

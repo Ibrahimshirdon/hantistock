@@ -6,6 +6,7 @@ import { env } from "./config/env.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { activityTracker } from "./middleware/activityTracker.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { mfaRouter } from "./modules/mfa/mfa.routes.js";
 import { inventoryRouter } from "./modules/inventory/inventory.routes.js";
 import { salesRouter } from "./modules/sales/sales.routes.js";
 import { customerRouter } from "./modules/customer/customer.routes.js";
@@ -48,6 +49,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/mfa", mfaRouter);
 app.use("/api/inventory", inventoryRouter);
 app.use("/api/sales", salesRouter);
 app.use("/api/customer", customerRouter);

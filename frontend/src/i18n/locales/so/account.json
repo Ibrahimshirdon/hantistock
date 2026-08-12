@@ -31,6 +31,34 @@
     "weakError": "Furaha sirta ah ee cusub aad buu u tabar yar yahay (ugu yaraan 6 xaraf)",
     "genericError": "Furaha sirta ah lama bedeli karo. Fadlan isku day mar kale."
   },
+  "twoFactor": {
+    "title": "Xaqiijinta laba-tallaabo",
+    "enabledDescription": "Waa la shaqaynayaa — soo gelitaanka wuxuu sidoo kale u baahan yahay far-raadkaaga, Face unlock, ama koodh backup ah.",
+    "disabledDescription": "Ku dar qalab hoos ku qoran si loo baahdo far-raadkaaga ama Face unlock marka aad soo gasho, sirtaada dushee.",
+    "addedOn": "La daray {{date}}",
+    "deviceNameLabel": "Magaca qalabka",
+    "deviceNamePlaceholder": "tusaale, Laptop-kayga",
+    "addDevice": "Ku dar qalabkan",
+    "adding": "Waa la darayaa...",
+    "backupCodes": "Koodhadhka backup-ka",
+    "backupCodesRemaining": "{{count}} koodh oo aan la isticmaalin",
+    "generateBackupCodes": "Samee koodhadh backup ah",
+    "backupCodesDialogTitle": "Koodhadhkaaga backup-ka",
+    "backupCodesDialogDescription": "Koodh kastaa hal mar buu shaqeeyaa, marka qalabkaagu aanu la heli karin. Meel ammaan ah ku kaydi — mar dambe lama muujin doono.",
+    "copyCodes": "Koobi koodhadhka",
+    "disable": "Damee xaqiijinta laba-tallaabo",
+    "confirmPasswordToDisable": "Xaqiiji furahaaga sirta ah ee hadda si aad u damayso",
+    "confirmDisable": "Damee xaqiijinta laba-tallaabo",
+    "disabling": "Waa la damaynayaa...",
+    "cancel": "Jooji",
+    "wrongPassword": "Furaha sirta ah ee hadda waa qalad",
+    "toasts": {
+      "deviceAdded": "Qalabka waa la daray",
+      "deviceRemoved": "Qalabka waa la saaray",
+      "disabled": "Xaqiijinta laba-tallaabo waa la damiyay",
+      "codesCopied": "Koodhadhka backup-ka waa la koobiyay"
+    }
+  },
   "appearance": {
     "title": "Muuqaalka",
     "currentlyUsing": "Hadda waxaad isticmaalaysaa qaab {{mode}}.",
