@@ -35,10 +35,28 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Mirrors requireRole.ts's MFA_SESSION_TTL_MS on the backend — kept in sync
+// manually since frontend and backend don't share a module. This is only a
+// UX shortcut to route straight to the challenge screen instead of flashing
+// the dashboard first; the backend's own check is what's actually enforced,
+// so drift here would be a UX papercut, not a security hole.
+const MFA_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+
+// getIdTokenResult() is normally near-instant (served from the SDK's local
+// cache), but nothing guarantees that — a slow/stuck token fetch here must
+// never stall the login button forever. Falling back to "satisfied" on
+// timeout is safe: it only ever produces a false positive that the backend's
+// own requireRole check (the actual enforcement point) still catches.
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | "timeout"> {
+  return Promise.race([promise, new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), ms))]);
+}
+
 async function computeMfaSatisfied(user: FirebaseUser, profile: UserProfile | null) {
   if (!profile || profile.role !== "admin" || !profile.mfaEnabled) return true;
-  const result = await user.getIdTokenResult();
-  return Boolean(result.claims.mfaVerifiedAt);
+  const result = await withTimeout(user.getIdTokenResult(), 8000);
+  if (result === "timeout") return true;
+  const verifiedAt = result.claims.mfaVerifiedAt;
+  return typeof verifiedAt === "number" && Date.now() - verifiedAt <= MFA_SESSION_TTL_MS;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

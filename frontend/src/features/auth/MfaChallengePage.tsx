@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -13,15 +13,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function MfaChallengePage() {
-  const { profile, mfaSatisfied, completeMfaChallenge, logout } = useAuth();
+  const { profile, loading, mfaSatisfied, completeMfaChallenge, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation("auth");
   const [webauthnPending, setWebauthnPending] = useState(false);
   const [webauthnFailed, setWebauthnFailed] = useState(false);
   const [backupCode, setBackupCode] = useState("");
   const [backupPending, setBackupPending] = useState(false);
+  // A direct/hard-reload landing on this route (e.g. the MFA_REQUIRED
+  // interceptor backstop) remounts AuthContext from scratch, so profile
+  // starts null and only resolves once onAuthStateChanged finishes — every
+  // check here must wait for `loading` to settle instead of trusting the
+  // first render's snapshot.
+  const autoTriggeredRef = useRef(false);
 
   useEffect(() => {
+    if (loading) return;
     if (!profile) {
       navigate("/login", { replace: true });
       return;
@@ -29,9 +36,7 @@ export function MfaChallengePage() {
     if (mfaSatisfied) {
       navigate(ROLE_HOME_ROUTE[profile.role], { replace: true });
     }
-    // Only re-run on the identity of the profile/satisfied signal, not on every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.uid, mfaSatisfied]);
+  }, [loading, profile, mfaSatisfied, navigate]);
 
   async function handleWebauthn() {
     setWebauthnPending(true);
@@ -51,15 +56,14 @@ export function MfaChallengePage() {
   }
 
   useEffect(() => {
-    if (profile && !mfaSatisfied) {
-      // Deferred a tick so the resulting setState (webauthnPending) lands
-      // outside this effect's synchronous execution, not as a mount-time
-      // cascading render.
-      queueMicrotask(() => handleWebauthn());
+    if (!loading && profile && !mfaSatisfied && !autoTriggeredRef.current) {
+      autoTriggeredRef.current = true;
+      handleWebauthn();
     }
-    // Fire once on mount to auto-prompt — re-triggering belongs to the retry button, not this effect.
+    // handleWebauthn is intentionally excluded — it's stable enough for this
+    // one-shot trigger and re-including it would re-run on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, profile, mfaSatisfied]);
 
   async function handleBackupCodeSubmit() {
     setBackupPending(true);
@@ -74,7 +78,13 @@ export function MfaChallengePage() {
     }
   }
 
-  if (!profile) return null;
+  if (loading || !profile) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="size-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
