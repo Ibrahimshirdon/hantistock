@@ -53,11 +53,22 @@ async function getUserCredentials(uid: string) {
 
 // Custom claims are replaced wholesale by setCustomUserClaims, not merged —
 // every call must re-include role or requireRole breaks for this user.
-async function setMfaClaims(uid: string, role: UserRole, opts: { enabled: boolean; verifiedNow?: boolean }) {
+//
+// verifiedForAuthTime binds the verification to THIS device's sign-in event
+// (see AuthenticatedUser.authTime) — without it, the claim would silently
+// satisfy every other device signed into the same account too, since custom
+// claims are account-wide rather than per-device.
+async function setMfaClaims(
+  uid: string,
+  role: UserRole,
+  opts: { enabled: boolean; verifiedForAuthTime?: number },
+) {
   await auth.setCustomUserClaims(uid, {
     role,
     mfaEnabled: opts.enabled,
-    ...(opts.verifiedNow ? { mfaVerifiedAt: Date.now() } : {}),
+    ...(opts.verifiedForAuthTime !== undefined
+      ? { mfaVerifiedAt: Date.now(), mfaVerifiedAuthTime: opts.verifiedForAuthTime }
+      : {}),
   });
 }
 
@@ -158,7 +169,7 @@ export async function verifyRegistration(
     mfaEnabled: true,
     updatedAt: FieldValue.serverTimestamp(),
   });
-  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedNow: true });
+  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedForAuthTime: user.authTime });
 
   await recordAuditLog({
     userId: user.uid,
@@ -222,7 +233,7 @@ export async function verifyAuthentication(user: AuthenticatedUser, response: Au
     counter: verification.authenticationInfo.newCounter,
     lastUsedAt: FieldValue.serverTimestamp(),
   });
-  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedNow: true });
+  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedForAuthTime: user.authTime });
 }
 
 export async function generateBackupCodes(user: AuthenticatedUser) {
@@ -259,7 +270,7 @@ export async function verifyBackupCode(user: AuthenticatedUser, code: string) {
 
   data.codes[index]!.usedAt = Timestamp.now();
   await ref.update({ codes: data.codes });
-  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedNow: true });
+  await setMfaClaims(user.uid, user.role, { enabled: true, verifiedForAuthTime: user.authTime });
 
   await recordAuditLog({
     userId: user.uid,

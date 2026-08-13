@@ -26,8 +26,10 @@ export async function verifyToken(
       uid: decoded.uid,
       email: decoded.email ?? "",
       role,
+      authTime: decoded.auth_time,
       mfaEnabled: decoded.mfaEnabled as boolean | undefined,
       mfaVerifiedAt: decoded.mfaVerifiedAt as number | undefined,
+      mfaVerifiedAuthTime: decoded.mfaVerifiedAuthTime as number | undefined,
     };
 
     next();

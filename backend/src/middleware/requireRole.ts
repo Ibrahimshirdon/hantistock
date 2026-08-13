@@ -18,12 +18,18 @@ export function requireRole(allowedRoles: UserRole[]) {
       return next(new AppError(403, "Insufficient permissions for this action"));
     }
     // Admins who have enrolled a second factor must have completed it
-    // recently in THIS token — a stolen/guessed password alone can never
-    // satisfy this, since mfaVerifiedAt only comes from a verified WebAuthn
-    // assertion or backup code (see mfa.service.ts).
+    // recently on THIS device's sign-in — a stolen/guessed password alone
+    // can never satisfy this, since mfaVerifiedAt only comes from a verified
+    // WebAuthn assertion or backup code (see mfa.service.ts). Custom claims
+    // are account-wide, not per-device — every device signed into this
+    // account mints tokens carrying the SAME mfaVerifiedAt/mfaVerifiedAuthTime
+    // claims, so without the authTime match below, one device completing
+    // the challenge would silently satisfy it for every other device on the
+    // same account too.
     if (req.user.role === "admin" && req.user.mfaEnabled) {
       const verifiedAt = req.user.mfaVerifiedAt;
-      if (!verifiedAt || Date.now() - verifiedAt > MFA_SESSION_TTL_MS) {
+      const verifiedForThisDevice = req.user.mfaVerifiedAuthTime === req.user.authTime;
+      if (!verifiedAt || !verifiedForThisDevice || Date.now() - verifiedAt > MFA_SESSION_TTL_MS) {
         return next(new AppError(401, "Second-factor verification required", "MFA_REQUIRED"));
       }
     }

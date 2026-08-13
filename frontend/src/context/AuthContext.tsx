@@ -56,7 +56,17 @@ async function computeMfaSatisfied(user: FirebaseUser, profile: UserProfile | nu
   const result = await withTimeout(user.getIdTokenResult(), 8000);
   if (result === "timeout") return true;
   const verifiedAt = result.claims.mfaVerifiedAt;
-  return typeof verifiedAt === "number" && Date.now() - verifiedAt <= MFA_SESSION_TTL_MS;
+  // mfaVerifiedAuthTime must match THIS device's auth_time — custom claims
+  // are account-wide, so without this check, one device completing the
+  // challenge would silently satisfy it for every other device signed into
+  // the same account too. auth_time is typed as a string on the client SDK
+  // but is a numeric JWT claim at runtime, hence the Number() coercion.
+  const verifiedForThisDevice = result.claims.mfaVerifiedAuthTime === Number(result.claims.auth_time);
+  return (
+    typeof verifiedAt === "number" &&
+    verifiedForThisDevice &&
+    Date.now() - verifiedAt <= MFA_SESSION_TTL_MS
+  );
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
