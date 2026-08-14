@@ -154,7 +154,13 @@ export function TwoFactorAuthCard() {
           </div>
         )}
 
-        <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:gap-2">
+        <form
+          className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            enrollMutation.mutate();
+          }}
+        >
           <div className="flex flex-1 flex-col gap-1.5">
             <Label htmlFor="deviceName">{t("twoFactor.deviceNameLabel")}</Label>
             <Input
@@ -164,15 +170,11 @@ export function TwoFactorAuthCard() {
               onChange={(e) => setDeviceName(e.target.value)}
             />
           </div>
-          <Button
-            className="w-fit"
-            disabled={enrollMutation.isPending}
-            onClick={() => enrollMutation.mutate()}
-          >
+          <Button type="submit" className="w-fit" disabled={enrollMutation.isPending}>
             <Fingerprint className="size-4" />
             {enrollMutation.isPending ? t("twoFactor.adding") : t("twoFactor.addDevice")}
           </Button>
-        </div>
+        </form>
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-4">
           <div>
@@ -200,23 +202,31 @@ export function TwoFactorAuthCard() {
                 {t("twoFactor.disable")}
               </Button>
             ) : (
-              <div className="flex flex-col gap-2">
+              <form
+                className="flex flex-col gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (disablePassword) disableMutation.mutate();
+                }}
+              >
                 <Label htmlFor="disablePassword">{t("twoFactor.confirmPasswordToDisable")}</Label>
                 <Input
                   id="disablePassword"
                   type="password"
+                  autoFocus
                   value={disablePassword}
                   onChange={(e) => setDisablePassword(e.target.value)}
                 />
                 <div className="flex gap-2">
                   <Button
+                    type="submit"
                     variant="destructive"
                     disabled={disableMutation.isPending || !disablePassword}
-                    onClick={() => disableMutation.mutate()}
                   >
                     {disableMutation.isPending ? t("twoFactor.disabling") : t("twoFactor.confirmDisable")}
                   </Button>
                   <Button
+                    type="button"
                     variant="ghost"
                     onClick={() => {
                       setShowDisableForm(false);
@@ -226,7 +236,7 @@ export function TwoFactorAuthCard() {
                     {t("twoFactor.cancel")}
                   </Button>
                 </div>
-              </div>
+              </form>
             )}
           </div>
         )}
