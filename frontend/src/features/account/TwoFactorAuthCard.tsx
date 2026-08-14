@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startRegistration } from "@simplewebauthn/browser";
-import {
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Fingerprint, KeyRound, ShieldCheck, Trash2 } from "lucide-react";
@@ -38,13 +34,11 @@ function formatDate(value: unknown): string {
 
 export function TwoFactorAuthCard() {
   const { t } = useTranslation("account");
-  const { firebaseUser, refreshProfile, completeMfaChallenge } = useAuth();
+  const { refreshProfile, completeMfaChallenge } = useAuth();
   const queryClient = useQueryClient();
 
   const [deviceName, setDeviceName] = useState("");
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
-  const [disablePassword, setDisablePassword] = useState("");
-  const [showDisableForm, setShowDisableForm] = useState(false);
 
   const { data: status } = useQuery({
     queryKey: ["mfa-status"],
@@ -90,26 +84,12 @@ export function TwoFactorAuthCard() {
   });
 
   const disableMutation = useMutation({
-    mutationFn: async () => {
-      if (!firebaseUser?.email) throw new Error("Not signed in");
-      const credential = EmailAuthProvider.credential(firebaseUser.email, disablePassword);
-      await reauthenticateWithCredential(firebaseUser, credential);
-      await disableMfa();
-    },
+    mutationFn: disableMfa,
     onSuccess: async () => {
       toast.success(t("twoFactor.toasts.disabled"));
-      setDisablePassword("");
-      setShowDisableForm(false);
       await afterMfaStateChange();
     },
-    onError: (error) => {
-      const code = (error as { code?: string }).code;
-      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-        toast.error(t("twoFactor.wrongPassword"));
-      } else {
-        toast.error(getApiErrorMessage(error));
-      }
-    },
+    onError: (error) => toast.error(getApiErrorMessage(error)),
   });
 
   return (
@@ -197,47 +177,13 @@ export function TwoFactorAuthCard() {
 
         {status?.enabled && (
           <div className="border-t pt-4">
-            {!showDisableForm ? (
-              <Button variant="outline" onClick={() => setShowDisableForm(true)}>
-                {t("twoFactor.disable")}
-              </Button>
-            ) : (
-              <form
-                className="flex flex-col gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (disablePassword) disableMutation.mutate();
-                }}
-              >
-                <Label htmlFor="disablePassword">{t("twoFactor.confirmPasswordToDisable")}</Label>
-                <Input
-                  id="disablePassword"
-                  type="password"
-                  autoFocus
-                  value={disablePassword}
-                  onChange={(e) => setDisablePassword(e.target.value)}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    disabled={disableMutation.isPending || !disablePassword}
-                  >
-                    {disableMutation.isPending ? t("twoFactor.disabling") : t("twoFactor.confirmDisable")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setShowDisableForm(false);
-                      setDisablePassword("");
-                    }}
-                  >
-                    {t("twoFactor.cancel")}
-                  </Button>
-                </div>
-              </form>
-            )}
+            <Button
+              variant="outline"
+              disabled={disableMutation.isPending}
+              onClick={() => disableMutation.mutate()}
+            >
+              {disableMutation.isPending ? t("twoFactor.disabling") : t("twoFactor.disable")}
+            </Button>
           </div>
         )}
       </CardContent>
