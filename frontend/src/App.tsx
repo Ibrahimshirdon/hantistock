@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { PageLoader } from "@/components/shared/PageLoader";
+import { PwaUpdater } from "@/components/shared/PwaUpdater";
 
 // Auth pages — small, always needed, keep eager
 import { LoginPage } from "@/features/auth/LoginPage";
@@ -75,6 +76,7 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <PwaUpdater />
       <LanguageProvider>
       <ThemeProvider>
       <AuthProvider>

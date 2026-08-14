@@ -8,6 +8,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      // Registered explicitly via the useRegisterSW hook (PwaUpdater.tsx) so
+      // the app can poll for updates on an idle tab and force a reload the
+      // moment a new deploy is found — the auto-injected registerSW.js only
+      // checks on navigation, which left an already-open tab able to run
+      // indefinitely against a build whose chunk files had been replaced.
+      injectRegister: false,
       // Precaches only the built app shell (JS/CSS/HTML/icons) so the app
       // is installable and can render offline — it does not intercept or
       // cache API/Firestore calls, since those go to a different origin
