@@ -26,6 +26,11 @@ supplierProductRouter.post(
   validate(createSupplierProductSchema),
   supplierProductController.create,
 );
+supplierProductRouter.post(
+  "/import",
+  requireRole(["supplier"]),
+  supplierProductController.importBulk,
+);
 supplierProductRouter.patch(
   "/:id",
   requireRole(["supplier"]),

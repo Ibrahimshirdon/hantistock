@@ -99,6 +99,7 @@
     "title": "Badeecadayda",
     "subtitle": "Badeecadaha aad qeybiso, oo loo kala saaray shirkadahaaga. Gudbinta kaydka waxay u dirtaa codsi ansixin maamul ka hor inta aan lagu darin kaydka guud.",
     "addProduct": "Ku dar badeeco",
+    "importCsv": "Keenida CSV",
     "empty": "Wali ma jiraan badeecado.",
     "submit": "Gudbi",
     "statusSubmitted": "La gudbiyay",
@@ -166,6 +167,22 @@
       "selectCompany": "Dooro shirkad",
       "sellingPriceTooLow": "Qiimaha iibka waa inuu ka sarreeya qiimaha kulaylaha"
     }
+  },
+  "importDialog": {
+    "title": "Ka keen badeecooyin CSV",
+    "downloadTemplate": "Soo deji tusaha CSV",
+    "dropzone": "Guji si aad u dooratid faylka CSV",
+    "fileLoaded": "{{count}} saf ayaa diyaar u ah in la keeno",
+    "preview": "Hordhac — {{count}} saf ee ugu horreeya",
+    "andMore": "{{count}} kale",
+    "importing": "Waa la keenayaa...",
+    "import": "Keen {{count}} saf",
+    "importMore": "Keen fayl kale",
+    "resultCreated": "{{count}} badeecadood ayaa la abuuray",
+    "resultErrors": "{{count}} saf ayaa qalad ku yeeshay",
+    "errorRow": "Safka {{row}}: {{message}}",
+    "errorEmpty": "Faylka CSV wax saf ah ma laha.",
+    "errorParse": "Faylka CSV lama fahmi karin."
   },
   "stockRequestsPage": {
     "title": "Codsiyada Kaydka",

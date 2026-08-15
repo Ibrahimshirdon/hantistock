@@ -59,6 +59,112 @@ export async function createSupplierProduct(input: CreateSupplierProductInput, a
   return { id: ref.id };
 }
 
+export interface ImportSupplierProductRow {
+  name: string;
+  category: string;
+  brand?: string;
+  unitType: string;
+  quantityInStock: number;
+  wholesalePrice: number;
+  sellingPrice: number;
+  minimumStockLevel: number;
+  purchasePrice: number;
+  batchNumber: string;
+  warehouseLocation: string;
+  expiryDate?: string;
+}
+
+export interface ImportSupplierProductResult {
+  created: number;
+  errors: { row: number; message: string }[];
+}
+
+// Bulk counterpart to createSupplierProduct — same ownership check and same
+// per-product Firestore shape, just written in a single batch instead of one
+// request per row. Unlike the admin product import (product.service.ts),
+// there's no SKU here to dedupe against — a SupplierProduct doesn't have one
+// until/unless it's submitted into real inventory — so every valid row is
+// created; only rows missing a required field are rejected.
+export async function importSupplierProducts(
+  companyId: string,
+  rows: ImportSupplierProductRow[],
+  actor: AuthenticatedUser,
+): Promise<ImportSupplierProductResult> {
+  const [companySnap, userSnap] = await Promise.all([
+    db.collection("supplierCompanies").doc(companyId).get(),
+    db.collection("users").doc(actor.uid).get(),
+  ]);
+  if (!companySnap.exists) {
+    throw new AppError(404, "Company not found");
+  }
+  const company = companySnap.data() as SupplierCompany;
+  if (company.supplierId !== actor.uid) {
+    throw new AppError(403, "You can only add products under your own companies");
+  }
+  const supplierName = userSnap.exists
+    ? (userSnap.data() as { displayName: string }).displayName
+    : actor.email;
+
+  const result: ImportSupplierProductResult = { created: 0, errors: [] };
+  const batch = db.batch();
+
+  rows.forEach((row, idx) => {
+    const rowNum = idx + 2; // 1-indexed + header row offset
+    if (!row.name?.trim()) {
+      result.errors.push({ row: rowNum, message: "Name is required" });
+      return;
+    }
+    if (!row.category?.trim()) {
+      result.errors.push({ row: rowNum, message: "Category is required" });
+      return;
+    }
+    if (!row.unitType?.trim()) {
+      result.errors.push({ row: rowNum, message: "Unit is required" });
+      return;
+    }
+    if (!row.batchNumber?.trim()) {
+      result.errors.push({ row: rowNum, message: "Batch number is required" });
+      return;
+    }
+    if (!row.warehouseLocation?.trim()) {
+      result.errors.push({ row: rowNum, message: "Warehouse location is required" });
+      return;
+    }
+
+    const ref = collection().doc();
+    batch.set(ref, {
+      supplierId: actor.uid,
+      supplierName,
+      companyId,
+      companyName: company.name,
+      companyManagerName: company.managerName,
+      name: row.name.trim(),
+      description: null,
+      category: row.category.trim(),
+      brand: row.brand?.trim() || null,
+      unitType: row.unitType.trim(),
+      quantityInStock: Number(row.quantityInStock) || 0,
+      wholesalePrice: Number(row.wholesalePrice) || 0,
+      sellingPrice: Number(row.sellingPrice) || 0,
+      minimumStockLevel: Number(row.minimumStockLevel) || 0,
+      taxRateId: null,
+      expiryDate: row.expiryDate ? new Date(row.expiryDate) : null,
+      purchasePrice: Number(row.purchasePrice) || 0,
+      purchaseDate: FieldValue.serverTimestamp(),
+      batchNumber: row.batchNumber.trim(),
+      warehouseLocation: row.warehouseLocation.trim(),
+      linkedProductId: null,
+      isActive: true,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    result.created++;
+  });
+
+  if (result.created > 0) await batch.commit();
+  return result;
+}
+
 export async function listSupplierProducts(filters: { supplierId?: string; companyId?: string }) {
   let query: FirebaseFirestore.Query = collection();
   if (filters.supplierId) query = query.where("supplierId", "==", filters.supplierId);

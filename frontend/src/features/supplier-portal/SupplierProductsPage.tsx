@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { Upload } from "lucide-react";
+import { ImportSupplierProductsDialog } from "./ImportSupplierProductsDialog";
 import {
   createSupplierProduct,
   deleteSupplierProduct,
@@ -74,6 +76,7 @@ export function SupplierProductsPage() {
   const { t } = useTranslation(["supplierPortal", "common"]);
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<SupplierProduct | null>(null);
   const [deleting, setDeleting] = useState<SupplierProduct | null>(null);
   const [submitting, setSubmitting] = useState<SupplierProduct | null>(null);
@@ -203,13 +206,22 @@ export function SupplierProductsPage() {
           <h1 className="text-2xl font-semibold">{t("productsPage.title")}</h1>
           <p className="text-muted-foreground">{t("productsPage.subtitle")}</p>
         </div>
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            <Button disabled={!companies || companies.length === 0}>
-              {t("productsPage.addProduct")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={!companies || companies.length === 0}
+            onClick={() => setImportOpen(true)}
+          >
+            <Upload className="me-1.5 size-4" />
+            {t("productsPage.importCsv")}
+          </Button>
+          <Dialog open={open} onOpenChange={handleOpenChange}>
+            <DialogTrigger asChild>
+              <Button disabled={!companies || companies.length === 0}>
+                {t("productsPage.addProduct")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t("productsPage.addProduct")}</DialogTitle>
             </DialogHeader>
@@ -407,8 +419,11 @@ export function SupplierProductsPage() {
               </DialogFooter>
             </form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
+
+      <ImportSupplierProductsDialog open={importOpen} onOpenChange={setImportOpen} />
 
       <Table>
         <TableHeader>

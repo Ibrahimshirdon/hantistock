@@ -1,10 +1,26 @@
 import type { Request, Response } from "express";
+import { AppError } from "../../shared/utils/AppError.js";
 import * as supplierProductService from "./supplierProduct.service.js";
 import * as supplierSubmissionService from "./supplierSubmission.service.js";
 
 export async function create(req: Request, res: Response) {
   const result = await supplierProductService.createSupplierProduct(req.body, req.user!);
   res.status(201).json({ success: true, data: result });
+}
+
+export async function importBulk(req: Request, res: Response) {
+  const { companyId, rows } = req.body;
+  if (!companyId || typeof companyId !== "string") {
+    throw new AppError(400, "companyId is required");
+  }
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new AppError(400, "rows must be a non-empty array");
+  }
+  if (rows.length > 500) {
+    throw new AppError(400, "Maximum 500 rows per import");
+  }
+  const result = await supplierProductService.importSupplierProducts(companyId, rows, req.user!);
+  res.json({ success: true, data: result });
 }
 
 export async function list(req: Request, res: Response) {

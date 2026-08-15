@@ -99,6 +99,7 @@
     "title": "منتجاتي",
     "subtitle": "المنتجات التي تورّدها، مصنفة تحت شركاتك. إرسال المخزون يبعث طلبًا لموافقة المسؤول قبل إضافته إلى المخزون.",
     "addProduct": "إضافة منتج",
+    "importCsv": "استيراد CSV",
     "empty": "لا توجد منتجات بعد.",
     "submit": "إرسال",
     "statusSubmitted": "تم الإرسال",
@@ -166,6 +167,22 @@
       "selectCompany": "اختر شركة",
       "sellingPriceTooLow": "يجب أن يكون سعر البيع أعلى من سعر الجملة"
     }
+  },
+  "importDialog": {
+    "title": "استيراد منتجات من CSV",
+    "downloadTemplate": "تنزيل نموذج CSV",
+    "dropzone": "انقر لاختيار ملف CSV",
+    "fileLoaded": "{{count}} صف جاهز للاستيراد",
+    "preview": "معاينة — أول {{count}} صف",
+    "andMore": "{{count}} أخرى",
+    "importing": "جارٍ الاستيراد...",
+    "import": "استيراد {{count}} صف",
+    "importMore": "استيراد ملف آخر",
+    "resultCreated": "تم إنشاء {{count}} منتج",
+    "resultErrors": "{{count}} صف به أخطاء",
+    "errorRow": "الصف {{row}}: {{message}}",
+    "errorEmpty": "ملف CSV لا يحتوي على صفوف بيانات.",
+    "errorParse": "تعذّر تحليل ملف CSV."
   },
   "stockRequestsPage": {
     "title": "طلبات المخزون",

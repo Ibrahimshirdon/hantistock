@@ -99,6 +99,7 @@
     "title": "My Products",
     "subtitle": "Products you supply, grouped under your companies. Submitting stock sends a request for admin approval before it's added to inventory.",
     "addProduct": "Add product",
+    "importCsv": "Import CSV",
     "empty": "No products yet.",
     "submit": "Submit",
     "statusSubmitted": "Submitted",
@@ -166,6 +167,22 @@
       "selectCompany": "Select a company",
       "sellingPriceTooLow": "Selling price must be higher than wholesale price"
     }
+  },
+  "importDialog": {
+    "title": "Import products from CSV",
+    "downloadTemplate": "Download CSV template",
+    "dropzone": "Click to choose a CSV file",
+    "fileLoaded": "{{count}} rows ready to import",
+    "preview": "Preview — first {{count}} rows",
+    "andMore": "{{count}} more",
+    "importing": "Importing...",
+    "import": "Import {{count}} rows",
+    "importMore": "Import another file",
+    "resultCreated": "{{count}} products created",
+    "resultErrors": "{{count}} rows had errors",
+    "errorRow": "Row {{row}}: {{message}}",
+    "errorEmpty": "CSV file has no data rows.",
+    "errorParse": "Could not parse the CSV file."
   },
   "stockRequestsPage": {
     "title": "Stock Requests",

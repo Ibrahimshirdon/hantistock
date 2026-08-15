@@ -64,6 +64,34 @@ export async function createSupplierProduct(input: CreateSupplierProductInput) {
   return data.data;
 }
 
+export interface ImportSupplierProductRow {
+  name: string;
+  category: string;
+  brand?: string;
+  unitType: string;
+  quantityInStock: number;
+  wholesalePrice: number;
+  sellingPrice: number;
+  minimumStockLevel: number;
+  purchasePrice: number;
+  batchNumber: string;
+  warehouseLocation: string;
+  expiryDate?: string;
+}
+
+export interface ImportSupplierProductResult {
+  created: number;
+  errors: { row: number; message: string }[];
+}
+
+export async function importSupplierProducts(companyId: string, rows: ImportSupplierProductRow[]) {
+  const { data } = await apiClient.post<ApiSuccess<ImportSupplierProductResult>>(
+    "/supplier/products/import",
+    { companyId, rows },
+  );
+  return data.data;
+}
+
 export async function listSupplierProducts(filters?: { companyId?: string }) {
   const { data } = await apiClient.get<ApiSuccess<SupplierProduct[]>>("/supplier/products", {
     params: filters,
