@@ -34,6 +34,7 @@ const COLLECTIONS_TO_WIPE = [
   "supplierCompanies",
   "supplierProducts",
   "supplierProfiles",
+  "supplierSubmissions",
   "taxRates",
   "walletTransactions",
 ];
