@@ -28,7 +28,31 @@
     "lowStock": "Low stock",
     "pendingApproval": "Pending approval",
     "unit": "Unit",
-    "importCsv": "Import CSV"
+    "importCsv": "Import CSV",
+    "addProduct": "Add product",
+    "createDialog": {
+      "title": "Add a new product",
+      "supplierCompany": "Supplier company",
+      "selectCompanyPlaceholder": "Select the sourcing company",
+      "supplierCompanyHint": "Links this product to that supplier so low-stock auto-reorder can request restock from them later.",
+      "barcodeOptional": "Barcode (optional)",
+      "descriptionOptional": "Description (optional)",
+      "existingCategory": "Use an existing category",
+      "existingCategoryPlaceholder": "Pick a category",
+      "initialQuantity": "Initial quantity",
+      "costPrice": "Cost price",
+      "sellingPriceTooLow": "Selling price must be higher than cost price",
+      "reorderLevel": "Reorder level",
+      "expiryDateOptional": "Expiry date (optional)",
+      "taxRate": "Tax rate",
+      "noTax": "No tax",
+      "batchNumber": "Batch number",
+      "warehouseLocation": "Warehouse location",
+      "creating": "Creating...",
+      "submit": "Create product",
+      "toastCreated": "Product created and live for sale",
+      "selectCompany": "Select a supplier company first"
+    }
   },
   "importProductsDialog": {
     "title": "Import Products from CSV",

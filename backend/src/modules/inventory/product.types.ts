@@ -1,9 +1,31 @@
 import { z } from "zod";
 
-// Products only ever enter the catalog via a supplier submission (direct or
-// via an approved stock request) — see supplierProduct.service.ts's
-// submitProductToInventory. There is no admin/manager "create from scratch"
-// path, so this file only needs an update schema.
+// Admin/manager create a product directly, but it must still be linked to an
+// existing supplier company (chosen from the full cross-supplier list) —
+// see product.service.ts's createProduct. That link is what lets the
+// low-stock auto-reorder system (lowStockAlert.ts) treat a hand-created
+// product exactly like a supplier-submitted one instead of silently never
+// requesting restock for it.
+export const createProductSchema = z.object({
+  companyId: z.string().min(1),
+  sku: z.string().min(1),
+  barcode: z.string().optional(),
+  name: z.string().min(2),
+  description: z.string().optional(),
+  category: z.string().min(1),
+  unit: z.string().min(1),
+  costPrice: z.coerce.number().nonnegative(),
+  sellingPrice: z.coerce.number().positive(),
+  taxRateId: z.string().nullable().optional(),
+  reorderLevel: z.coerce.number().nonnegative().default(10),
+  maxStockLevel: z.coerce.number().nonnegative().optional(),
+  expiryDate: z.string().optional(),
+  batchNumber: z.string().min(1),
+  warehouseLocation: z.string().min(1),
+  initialQuantity: z.coerce.number().nonnegative().default(0),
+});
+export type CreateProductInput = z.infer<typeof createProductSchema>;
+
 export const updateProductSchema = z.object({
   sku: z.string().min(1).optional(),
   barcode: z.string().optional(),

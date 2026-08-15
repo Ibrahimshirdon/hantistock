@@ -40,6 +40,30 @@ export interface ProductInput {
   expiryDate?: string | null;
 }
 
+export interface CreateProductInput {
+  companyId: string;
+  sku: string;
+  barcode?: string;
+  name: string;
+  description?: string;
+  category: string;
+  unit: string;
+  costPrice: number;
+  sellingPrice: number;
+  taxRateId?: string | null;
+  reorderLevel: number;
+  maxStockLevel?: number;
+  expiryDate?: string;
+  batchNumber: string;
+  warehouseLocation: string;
+  initialQuantity: number;
+}
+
+export async function createProduct(input: CreateProductInput) {
+  const { data } = await apiClient.post<ApiSuccess<{ id: string }>>("/inventory/products", input);
+  return data.data;
+}
+
 export async function listProducts(filters?: {
   categoryId?: string;
   lowStock?: boolean;

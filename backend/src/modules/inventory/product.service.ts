@@ -6,8 +6,10 @@ import { recordAuditLog } from "../../shared/utils/auditLog.js";
 import { createNotification } from "../../shared/utils/notifications.js";
 import type { AuthenticatedUser } from "../../shared/types/auth.types.js";
 import type { Product } from "../../shared/types/inventory.types.js";
-import type { UpdateProductInput } from "./product.types.js";
+import type { SupplierCompany } from "../../shared/types/supplier.types.js";
+import type { CreateProductInput, UpdateProductInput } from "./product.types.js";
 import { notifyIfNewlyLowStock } from "./lowStockAlert.js";
+import { receiveStock } from "./stock.service.js";
 
 const collection = () => db.collection("products");
 
@@ -58,6 +60,143 @@ export async function getProductByBarcode(barcode: string) {
   }
   const doc = snap.docs[0]!;
   return { id: doc.id, ...doc.data() } as Product;
+}
+
+async function findOrCreateCategoryByName(name: string): Promise<{ id: string; name: string }> {
+  const snap = await db.collection("categories").where("name", "==", name).limit(1).get();
+  if (!snap.empty) {
+    return { id: snap.docs[0]!.id, name };
+  }
+  const ref = db.collection("categories").doc();
+  await ref.set({
+    name,
+    description: null,
+    parentCategoryId: null,
+    imageUrl: null,
+    isActive: true,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  return { id: ref.id, name };
+}
+
+// Admin/manager create a product directly rather than waiting on a supplier
+// submission — but it must still resolve to a real SupplierProduct under the
+// chosen company, mirroring exactly what applySupplierProductToInventory
+// (supplierProduct.service.ts) builds when a supplier's own submission gets
+// approved. That's what keeps this product eligible for the low-stock
+// auto-reorder system (lowStockAlert.ts), which only ever acts on products
+// carrying a supplierProductId — without this link, a hand-created product
+// would silently never get an automatic restock request.
+export async function createProduct(input: CreateProductInput, actor: AuthenticatedUser) {
+  if (input.sellingPrice <= input.costPrice) {
+    throw new AppError(400, "Selling price must be higher than cost price");
+  }
+
+  const sku = input.sku.trim().toUpperCase();
+  const existingSku = await collection().where("sku", "==", sku).limit(1).get();
+  if (!existingSku.empty) {
+    throw new AppError(409, `A product with SKU "${sku}" already exists`);
+  }
+
+  const companySnap = await db.collection("supplierCompanies").doc(input.companyId).get();
+  if (!companySnap.exists) {
+    throw new AppError(404, "Supplier company not found");
+  }
+  const company = companySnap.data() as SupplierCompany;
+
+  const supplierUserSnap = await db.collection("users").doc(company.supplierId).get();
+  const supplierName = supplierUserSnap.exists
+    ? (supplierUserSnap.data() as { displayName: string }).displayName
+    : company.name;
+
+  const category = await findOrCreateCategoryByName(input.category.trim());
+
+  const supplierProductRef = db.collection("supplierProducts").doc();
+  const productRef = collection().doc();
+
+  await supplierProductRef.set({
+    supplierId: company.supplierId,
+    supplierName,
+    companyId: input.companyId,
+    companyName: company.name,
+    companyManagerName: company.managerName,
+    name: input.name.trim(),
+    description: input.description?.trim() || null,
+    category: category.name,
+    brand: null,
+    unitType: input.unit.trim(),
+    quantityInStock: input.initialQuantity,
+    wholesalePrice: input.costPrice,
+    sellingPrice: input.sellingPrice,
+    minimumStockLevel: input.reorderLevel,
+    taxRateId: input.taxRateId ?? null,
+    expiryDate: input.expiryDate ? Timestamp.fromDate(new Date(input.expiryDate)) : null,
+    purchasePrice: input.costPrice,
+    purchaseDate: FieldValue.serverTimestamp(),
+    batchNumber: input.batchNumber.trim(),
+    warehouseLocation: input.warehouseLocation.trim(),
+    linkedProductId: productRef.id,
+    isActive: true,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  await productRef.set({
+    sku,
+    barcode: input.barcode?.trim() || null,
+    name: input.name.trim(),
+    description: input.description?.trim() || null,
+    categoryId: category.id,
+    categoryName: category.name,
+    unit: input.unit.trim(),
+    costPrice: input.costPrice,
+    sellingPrice: input.sellingPrice,
+    taxRateId: input.taxRateId ?? null,
+    images: [],
+    reorderLevel: input.reorderLevel,
+    maxStockLevel: input.maxStockLevel ?? null,
+    trackBatches: true,
+    totalStock: 0,
+    isLowStock: false,
+    isActive: true,
+    approvalStatus: "approved",
+    supplierProductId: supplierProductRef.id,
+    expiryDate: null,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  if (input.initialQuantity > 0) {
+    await receiveStock(
+      {
+        productId: productRef.id,
+        batchNumber: input.batchNumber.trim(),
+        quantity: input.initialQuantity,
+        costPrice: input.costPrice,
+        expiryDate: input.expiryDate ? new Date(input.expiryDate) : undefined,
+        damagedQuantity: 0,
+        missingQuantity: 0,
+        returnedQuantity: 0,
+      },
+      actor,
+    );
+    // The supplier-side ledger should reflect that this opening quantity has
+    // already moved into real inventory, same as a supplier's own submission
+    // decrementing quantityInStock once it's been received.
+    await supplierProductRef.update({ quantityInStock: 0, updatedAt: FieldValue.serverTimestamp() });
+  }
+
+  await recordAuditLog({
+    userId: actor.uid,
+    userName: actor.email,
+    role: actor.role,
+    action: "PRODUCT_CREATED",
+    entityType: "product",
+    entityId: productRef.id,
+    after: { sku, name: input.name.trim(), companyId: input.companyId },
+  });
+
+  return { id: productRef.id };
 }
 
 export async function updateProduct(id: string, input: UpdateProductInput) {

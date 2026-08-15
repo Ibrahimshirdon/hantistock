@@ -28,7 +28,31 @@
     "lowStock": "مخزون منخفض",
     "pendingApproval": "بانتظار الموافقة",
     "unit": "الوحدة",
-    "importCsv": "استيراد CSV"
+    "importCsv": "استيراد CSV",
+    "addProduct": "إضافة منتج",
+    "createDialog": {
+      "title": "إضافة منتج جديد",
+      "supplierCompany": "شركة المورد",
+      "selectCompanyPlaceholder": "اختر الشركة المصدر",
+      "supplierCompanyHint": "يربط هذا المنتج بذلك المورد حتى يتمكن نظام إعادة الطلب التلقائي عند نقص المخزون من طلب التزويد منه لاحقًا.",
+      "barcodeOptional": "الباركود (اختياري)",
+      "descriptionOptional": "الوصف (اختياري)",
+      "existingCategory": "استخدام فئة موجودة",
+      "existingCategoryPlaceholder": "اختر فئة",
+      "initialQuantity": "الكمية الأولية",
+      "costPrice": "سعر التكلفة",
+      "sellingPriceTooLow": "يجب أن يكون سعر البيع أعلى من سعر التكلفة",
+      "reorderLevel": "حد إعادة الطلب",
+      "expiryDateOptional": "تاريخ انتهاء الصلاحية (اختياري)",
+      "taxRate": "نسبة الضريبة",
+      "noTax": "بدون ضريبة",
+      "batchNumber": "رقم الدفعة",
+      "warehouseLocation": "موقع المستودع",
+      "creating": "جارٍ الإنشاء...",
+      "submit": "إنشاء المنتج",
+      "toastCreated": "تم إنشاء المنتج وهو متاح للبيع الآن",
+      "selectCompany": "اختر شركة مورد أولاً"
+    }
   },
   "importProductsDialog": {
     "title": "استيراد المنتجات من CSV",

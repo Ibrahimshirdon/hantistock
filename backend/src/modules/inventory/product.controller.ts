@@ -21,6 +21,11 @@ export async function getByBarcode(req: Request, res: Response) {
   res.json({ success: true, data: product });
 }
 
+export async function create(req: Request, res: Response) {
+  const result = await productService.createProduct(req.body, req.user!);
+  res.status(201).json({ success: true, data: result });
+}
+
 export async function update(req: Request, res: Response) {
   const result = await productService.updateProduct(req.params.id as string, req.body);
   res.json({ success: true, data: result });

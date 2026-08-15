@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Package, Upload } from "lucide-react";
+import { Package, Plus, Upload } from "lucide-react";
 import { ImportProductsDialog } from "./ImportProductsDialog";
+import { CreateProductDialog } from "./CreateProductDialog";
 import { listCategories, listProducts } from "@/api/inventory.api";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,7 @@ export function ProductsPage() {
   const [categoryId, setCategoryId] = useState<string>("all");
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const { data: categories } = useQuery({ queryKey: ["categories"], queryFn: listCategories });
   const { data: products, isLoading } = useQuery({
@@ -67,17 +69,27 @@ export function ProductsPage() {
           <p className="text-muted-foreground">{t("productsPage.subtitle")}</p>
         </div>
         {canImport && (
-          <button
-            onClick={() => setImportOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            <Upload className="size-4" />
-            {t("productsPage.importCsv")}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setImportOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <Upload className="size-4" />
+              {t("productsPage.importCsv")}
+            </button>
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            >
+              <Plus className="size-4" />
+              {t("productsPage.addProduct")}
+            </button>
+          </div>
         )}
       </div>
 
       {canImport && <ImportProductsDialog open={importOpen} onOpenChange={setImportOpen} />}
+      {canImport && <CreateProductDialog open={createOpen} onOpenChange={setCreateOpen} />}
 
       <div className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1.5">

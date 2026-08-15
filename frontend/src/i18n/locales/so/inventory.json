@@ -28,7 +28,31 @@
     "lowStock": "Kayd yar",
     "pendingApproval": "Sugaya ansixin",
     "unit": "Halbeegga",
-    "importCsv": "Keenida CSV"
+    "importCsv": "Keenida CSV",
+    "addProduct": "Ku dar badeeco",
+    "createDialog": {
+      "title": "Ku dar badeeco cusub",
+      "supplierCompany": "Shirkadda alaab-qeybiyaha",
+      "selectCompanyPlaceholder": "Dooro shirkadda ay ka imanayso",
+      "supplierCompanyHint": "Waxay badeecadan xidhiisiinaysaa alaab-qeybiyahaas si nidaamka dib-u-dalbashada tooska ah uu ugu dalban karo kayd markii uu yaraado.",
+      "barcodeOptional": "Barcode (ikhtiyaari)",
+      "descriptionOptional": "Sharaxaad (ikhtiyaari)",
+      "existingCategory": "Isticmaal qayb hore u jirta",
+      "existingCategoryPlaceholder": "Dooro qayb",
+      "initialQuantity": "Tirada bilowga ah",
+      "costPrice": "Qiimaha kharashka",
+      "sellingPriceTooLow": "Qiimaha iibku waa inuu ka sarreeyaa qiimaha kharashka",
+      "reorderLevel": "Heerka dib-u-dalbashada",
+      "expiryDateOptional": "Taariikhda dhicitaanka (ikhtiyaari)",
+      "taxRate": "Heerka canshuurta",
+      "noTax": "Canshuur ma jirto",
+      "batchNumber": "Lambarka hurdada",
+      "warehouseLocation": "Goobta bakhaarka",
+      "creating": "Waa la abuurayaa...",
+      "submit": "Abuur badeecada",
+      "toastCreated": "Badeecada waa la abuuray waana diyaar iib",
+      "selectCompany": "Marka hore dooro shirkad alaab-qeybiye ah"
+    }
   },
   "importProductsDialog": {
     "title": "Keenida Badeecadaha CSV",
