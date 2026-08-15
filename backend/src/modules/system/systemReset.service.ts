@@ -11,6 +11,7 @@ import type { AuthenticatedUser } from "../../shared/types/auth.types.js";
 // whatever collections future modules add.
 const COLLECTIONS_TO_WIPE = [
   "activityLogs",
+  "attendanceRecords",
   "auditLogs",
   "batches",
   "categories",
@@ -20,6 +21,7 @@ const COLLECTIONS_TO_WIPE = [
   "discounts",
   "driverProfiles",
   "expenses",
+  "faceEnrollments",
   "goodsReceipts",
   "invoices",
   "loans",
@@ -28,7 +30,9 @@ const COLLECTIONS_TO_WIPE = [
   "otherIncome",
   "products",
   "receipts",
+  "salaries",
   "salesOrders",
+  "salesReturns",
   "stockAdjustments",
   "stockRequests",
   "supplierCompanies",
@@ -66,6 +70,17 @@ async function wipeDeliveriesWithHistory() {
   await deleteDocs(snap.docs);
 }
 
+// Same reasoning as deliveries above — each stocktake session has an "items"
+// subcollection that a parent-doc delete would otherwise orphan.
+async function wipeStocktakeSessionsWithItems() {
+  const snap = await db.collection("stocktakeSessions").get();
+  for (const doc of snap.docs) {
+    const itemsSnap = await doc.ref.collection("items").get();
+    await deleteDocs(itemsSnap.docs);
+  }
+  await deleteDocs(snap.docs);
+}
+
 async function deleteAllAuthUsersExcept(keepUid: string) {
   let pageToken: string | undefined;
   let deletedCount = 0;
@@ -83,6 +98,7 @@ async function deleteAllAuthUsersExcept(keepUid: string) {
 
 export async function resetSystem(actor: AuthenticatedUser) {
   await wipeDeliveriesWithHistory();
+  await wipeStocktakeSessionsWithItems();
   for (const name of COLLECTIONS_TO_WIPE) {
     await wipeCollection(name);
   }
