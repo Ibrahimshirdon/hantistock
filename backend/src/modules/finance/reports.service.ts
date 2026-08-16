@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase.js";
-import type { SalesOrder } from "../../shared/types/sales.types.js";
+import type { SalesOrder, SalesReturn } from "../../shared/types/sales.types.js";
 import type { Product } from "../../shared/types/inventory.types.js";
 import type { Expense, OtherIncome } from "../../shared/types/finance.types.js";
 import type { Loan } from "../../shared/types/loan.types.js";
@@ -26,7 +26,10 @@ async function getCompletedSalesInRange({ dateFrom, dateTo }: DateRange): Promis
   const from = dateFrom.getTime();
   const to = dateTo.getTime();
   return snap.docs
-    .map((d) => d.data() as SalesOrder)
+    // Order documents don't store their own id field (see salesOrder.service.ts's
+    // orderData) — it only exists as Firestore doc metadata, so it must be
+    // attached explicitly or o.id below silently comes back undefined.
+    .map((d) => ({ id: d.id, ...d.data() }) as SalesOrder)
     .filter((o) => {
       const ms = o.createdAt.toMillis();
       return ms >= from && ms <= to;
@@ -51,7 +54,24 @@ async function getOtherIncomeInRange({ dateFrom, dateTo }: DateRange): Promise<O
   return snap.docs.map((d) => d.data() as OtherIncome);
 }
 
-async function getCostOfGoodsSold(orders: SalesOrder[]): Promise<number> {
+// Refunded items go back on the shelf (see salesReturn.service.ts restoring
+// batch/product stock), so counting their cost as "goods sold" overstates
+// COGS by the same amount a refund overstates revenue — this nets both
+// against the same per-order refund data for a consistent picture.
+async function getReturnsForOrders(orderIds: string[]): Promise<SalesReturn[]> {
+  if (orderIds.length === 0) return [];
+  const chunks: string[][] = [];
+  for (let i = 0; i < orderIds.length; i += 30) chunks.push(orderIds.slice(i, i + 30));
+  const snaps = await Promise.all(
+    chunks.map((chunk) => db.collection("salesReturns").where("orderId", "in", chunk).get()),
+  );
+  return snaps.flatMap((snap) => snap.docs.map((d) => d.data() as SalesReturn));
+}
+
+async function getCostOfGoodsSold(
+  orders: SalesOrder[],
+  returnedQtyByProduct: Map<string, number>,
+): Promise<number> {
   const productIds = new Set<string>();
   orders.forEach((o) => o.items.forEach((item) => productIds.add(item.productId)));
   if (productIds.size === 0) return 0;
@@ -64,11 +84,17 @@ async function getCostOfGoodsSold(orders: SalesOrder[]): Promise<number> {
     if (snap.exists) costById.set(snap.id, (snap.data() as Product).costPrice);
   });
 
-  let cogs = 0;
+  const soldQtyByProduct = new Map<string, number>();
   orders.forEach((o) => {
     o.items.forEach((item) => {
-      cogs += item.quantity * (costById.get(item.productId) ?? 0);
+      soldQtyByProduct.set(item.productId, (soldQtyByProduct.get(item.productId) ?? 0) + item.quantity);
     });
+  });
+
+  let cogs = 0;
+  soldQtyByProduct.forEach((soldQty, productId) => {
+    const netQty = Math.max(0, soldQty - (returnedQtyByProduct.get(productId) ?? 0));
+    cogs += netQty * (costById.get(productId) ?? 0);
   });
   return cogs;
 }
@@ -92,9 +118,30 @@ export async function getFinancialSummary(range: DateRange) {
     getOtherIncomeInRange(range),
     getOutstandingLoansTotal(),
   ]);
-  const cogs = await getCostOfGoodsSold(sales);
+  const returns = await getReturnsForOrders(sales.map((o) => o.id));
 
-  const salesRevenue = round2(sales.reduce((sum, o) => sum + o.grandTotal, 0));
+  const refundTotalByOrder = new Map<string, number>();
+  const returnedQtyByProduct = new Map<string, number>();
+  returns.forEach((ret) => {
+    refundTotalByOrder.set(ret.orderId, (refundTotalByOrder.get(ret.orderId) ?? 0) + ret.refundTotal);
+    ret.items.forEach((item) => {
+      returnedQtyByProduct.set(
+        item.productId,
+        (returnedQtyByProduct.get(item.productId) ?? 0) + item.quantity,
+      );
+    });
+  });
+
+  const cogs = await getCostOfGoodsSold(sales, returnedQtyByProduct);
+
+  // Net of refunds — a returned order shouldn't keep counting its full
+  // original amount toward revenue once money has actually gone back out.
+  const salesRevenue = round2(
+    sales.reduce(
+      (sum, o) => sum + Math.max(0, o.grandTotal - (refundTotalByOrder.get(o.id) ?? 0)),
+      0,
+    ),
+  );
   const otherIncomeTotal = round2(otherIncome.reduce((sum, i) => sum + i.amount, 0));
   const totalRevenue = round2(salesRevenue + otherIncomeTotal);
   const totalExpenses = round2(expenses.reduce((sum, e) => sum + e.amount, 0));
