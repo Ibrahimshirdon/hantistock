@@ -2,9 +2,9 @@ import { useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { Banknote } from "lucide-react";
+import { Banknote, CheckCircle2 } from "lucide-react";
 import { listUsers } from "@/api/auth.api";
-import { deleteSalary, listSalaries, setSalary } from "@/api/hr.api";
+import { deleteSalary, listSalaries, paySalary, setSalary, unpaySalary } from "@/api/hr.api";
 import { getApiErrorMessage } from "@/api/client";
 import type { UserProfile } from "@/types/auth.types";
 import type { StaffSalary } from "@/types/hr.types";
@@ -98,6 +98,26 @@ export function StaffSalariesPage() {
     onError: (error) => toast.error(getApiErrorMessage(error)),
   });
 
+  const payMutation = useMutation({
+    mutationFn: (staffId: string) => paySalary(staffId),
+    onSuccess: () => {
+      toast.success(t("salariesPage.toasts.paid"));
+      queryClient.invalidateQueries({ queryKey: ["salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error)),
+  });
+
+  const unpayMutation = useMutation({
+    mutationFn: (staffId: string) => unpaySalary(staffId),
+    onSuccess: () => {
+      toast.success(t("salariesPage.toasts.unpaid"));
+      queryClient.invalidateQueries({ queryKey: ["salaries"] });
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error)),
+  });
+
   function openDialog(user: UserProfile) {
     const existing = salaryByStaffId.get(user.uid);
     setForm(
@@ -145,20 +165,21 @@ export function StaffSalariesPage() {
             <TableHead>{t("salariesPage.columns.monthlySalary")}</TableHead>
             <TableHead>{t("salariesPage.columns.effectiveDate")}</TableHead>
             <TableHead>{t("common:fields.notes")}</TableHead>
+            <TableHead>{t("salariesPage.columns.thisMonth")}</TableHead>
             <TableHead className="text-end">{t("common:fields.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
                 {t("common:actions.loading")}
               </TableCell>
             </TableRow>
           )}
           {!isLoading && eligibleStaff.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
                 {t("salariesPage.empty")}
               </TableCell>
             </TableRow>
@@ -178,6 +199,34 @@ export function StaffSalariesPage() {
                   {salary ? new Date(salary.effectiveDate._seconds * 1000).toLocaleDateString() : "—"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">{salary?.notes ?? "—"}</TableCell>
+                <TableCell>
+                  {!salary ? (
+                    "—"
+                  ) : salary.paidThisMonth ? (
+                    <div className="flex items-center gap-2">
+                      <Badge variant="success" className="gap-1">
+                        <CheckCircle2 className="size-3.5" />
+                        {t("salariesPage.paid")}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={unpayMutation.isPending}
+                        onClick={() => unpayMutation.mutate(user.uid)}
+                      >
+                        {t("salariesPage.undoPaid")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      disabled={payMutation.isPending}
+                      onClick={() => payMutation.mutate(user.uid)}
+                    >
+                      {t("salariesPage.markAsPaid")}
+                    </Button>
+                  )}
+                </TableCell>
                 <TableCell className="text-end">
                   <div className="flex justify-end gap-2">
                     <Button size="sm" variant="outline" onClick={() => openDialog(user)}>

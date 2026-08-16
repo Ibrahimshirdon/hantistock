@@ -5,17 +5,23 @@
     "totalPayroll": "Wadarta mushaharka bishii",
     "columns": {
       "monthlySalary": "Mushaharka bishii",
-      "effectiveDate": "Taariikhda dhaqangelinta"
+      "effectiveDate": "Taariikhda dhaqangelinta",
+      "thisMonth": "Bishaan"
     },
     "empty": "Lama helin shaqaale, maareeye, ama darawal.",
     "setSalary": "Dejiso mushaharka",
+    "markAsPaid": "Calaamadi in la bixiyay",
+    "paid": "La bixiyay",
+    "undoPaid": "Ka noqo",
     "dialog": {
       "title": "Mushaharka: {{name}}",
       "save": "Keydi mushaharka"
     },
     "toasts": {
       "saved": "Mushaharka waa la keydiyay",
-      "deleted": "Diiwaanka mushaharka waa la tirtiray"
+      "deleted": "Diiwaanka mushaharka waa la tirtiray",
+      "paid": "Waa la calaamadiyay in la bixiyay — waxaa lagu daray Maaliyadda sida kharash",
+      "unpaid": "Bixinta waa la baabi'iyay — waxaa laga saaray Maaliyadda"
     }
   },
   "attendancePage": {

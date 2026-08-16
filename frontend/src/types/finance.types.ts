@@ -29,10 +29,6 @@ export interface FinancialSummary {
   totalRevenue: number;
   costOfGoodsSold: number;
   totalExpenses: number;
-  // Estimated from current staff salary rates pro-rated across the report's
-  // date range — already folded into totalExpenses, surfaced separately so
-  // the UI can label it as an estimate rather than a recorded transaction.
-  estimatedSalaryExpense: number;
   grossProfit: number;
   netProfit: number;
   cashOnHand: number;

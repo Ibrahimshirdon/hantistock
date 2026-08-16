@@ -14,6 +14,9 @@ export interface StaffSalary {
   updatedBy: string;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
+  // Whether this staff member's salary has already been marked paid for the
+  // current calendar month — see paySalary/unpaySalary.
+  paidThisMonth: boolean;
 }
 
 export interface FaceEnrollment {

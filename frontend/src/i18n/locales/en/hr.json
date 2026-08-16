@@ -5,17 +5,23 @@
     "totalPayroll": "Total monthly payroll",
     "columns": {
       "monthlySalary": "Monthly salary",
-      "effectiveDate": "Effective date"
+      "effectiveDate": "Effective date",
+      "thisMonth": "This month"
     },
     "empty": "No staff, managers, or drivers found.",
     "setSalary": "Set salary",
+    "markAsPaid": "Mark as paid",
+    "paid": "Paid",
+    "undoPaid": "Undo",
     "dialog": {
       "title": "Salary: {{name}}",
       "save": "Save salary"
     },
     "toasts": {
       "saved": "Salary saved",
-      "deleted": "Salary record deleted"
+      "deleted": "Salary record deleted",
+      "paid": "Marked as paid — added to Finance as an expense",
+      "unpaid": "Payment undone — removed from Finance"
     }
   },
   "attendancePage": {

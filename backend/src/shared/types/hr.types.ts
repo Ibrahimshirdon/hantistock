@@ -17,6 +17,24 @@ export interface StaffSalary {
   updatedAt: Timestamp;
 }
 
+// One doc per staff member per calendar month (doc id == `${staffId}_${period}`,
+// period == "YYYY-MM") — the actual record that a salary was paid out,
+// distinct from StaffSalary (which is just the current rate, not a payment
+// history). Marking a period paid also creates a real Expense doc so it
+// flows through the existing Finance reporting with no special-casing;
+// expenseId links back to it so unpaying can remove that expense too.
+export interface SalaryPayment {
+  id: string;
+  staffId: string;
+  staffName: string;
+  period: string;
+  amount: number;
+  expenseId: string;
+  paidBy: string;
+  paidByName: string;
+  paidAt: Timestamp;
+}
+
 // One doc per staff member (doc id == staffId) — enrolling a face again
 // overwrites the previous descriptor rather than keeping a history, same
 // upsert convention as StaffSalary.

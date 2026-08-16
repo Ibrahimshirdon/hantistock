@@ -23,6 +23,17 @@ export async function deleteSalary(staffId: string) {
   await apiClient.delete(`/hr/salaries/${staffId}`);
 }
 
+export async function paySalary(staffId: string) {
+  const { data } = await apiClient.post<ApiSuccess<{ period: string; expenseId: string }>>(
+    `/hr/salaries/${staffId}/pay`,
+  );
+  return data.data;
+}
+
+export async function unpaySalary(staffId: string) {
+  await apiClient.post(`/hr/salaries/${staffId}/unpay`);
+}
+
 // Attendance
 export interface RecordAttendanceInput {
   staffId: string;

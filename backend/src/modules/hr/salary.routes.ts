@@ -14,3 +14,5 @@ salaryRouter.post(
   salaryController.set,
 );
 salaryRouter.delete("/:staffId", requireRole(["admin"]), salaryController.remove);
+salaryRouter.post("/:staffId/pay", requireRole(["admin", "manager"]), salaryController.pay);
+salaryRouter.post("/:staffId/unpay", requireRole(["admin", "manager"]), salaryController.unpay);
