@@ -3,6 +3,7 @@ import type { SalesOrder, SalesReturn } from "../../shared/types/sales.types.js"
 import type { Product } from "../../shared/types/inventory.types.js";
 import type { Expense, OtherIncome } from "../../shared/types/finance.types.js";
 import type { Loan } from "../../shared/types/loan.types.js";
+import type { StaffSalary } from "../../shared/types/hr.types.js";
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -43,6 +44,25 @@ async function getExpensesInRange({ dateFrom, dateTo }: DateRange): Promise<Expe
     .where("date", "<=", dateTo)
     .get();
   return snap.docs.map((d) => d.data() as Expense);
+}
+
+// Salaries are stored as a current rate per staff member (see
+// salary.service.ts), not as dated payment records — there's no "salary was
+// actually paid on this day" event to query by date the way expenses/income
+// are. So instead of summing real transactions, this estimates the cost for
+// the range by pro-rating everyone's current monthly rate across however
+// many days the range spans, against a 30-day month (matching the "30d"
+// framing the Dashboard already uses everywhere else).
+async function getEstimatedSalaryExpense({ dateFrom, dateTo }: DateRange): Promise<number> {
+  const snap = await db.collection("salaries").get();
+  const totalMonthlySalary = snap.docs.reduce(
+    (sum, d) => sum + ((d.data() as StaffSalary).monthlySalary || 0),
+    0,
+  );
+  if (totalMonthlySalary === 0) return 0;
+
+  const rangeDays = Math.round((dateTo.getTime() - dateFrom.getTime()) / 86_400_000) + 1;
+  return round2((totalMonthlySalary * rangeDays) / 30);
 }
 
 async function getOtherIncomeInRange({ dateFrom, dateTo }: DateRange): Promise<OtherIncome[]> {
@@ -112,11 +132,12 @@ async function getOutstandingLoansTotal(): Promise<number> {
 }
 
 export async function getFinancialSummary(range: DateRange) {
-  const [sales, expenses, otherIncome, outstandingLoans] = await Promise.all([
+  const [sales, expenses, otherIncome, outstandingLoans, estimatedSalaryExpense] = await Promise.all([
     getCompletedSalesInRange(range),
     getExpensesInRange(range),
     getOtherIncomeInRange(range),
     getOutstandingLoansTotal(),
+    getEstimatedSalaryExpense(range),
   ]);
   const returns = await getReturnsForOrders(sales.map((o) => o.id));
 
@@ -144,7 +165,9 @@ export async function getFinancialSummary(range: DateRange) {
   );
   const otherIncomeTotal = round2(otherIncome.reduce((sum, i) => sum + i.amount, 0));
   const totalRevenue = round2(salesRevenue + otherIncomeTotal);
-  const totalExpenses = round2(expenses.reduce((sum, e) => sum + e.amount, 0));
+  const totalExpenses = round2(
+    expenses.reduce((sum, e) => sum + e.amount, 0) + estimatedSalaryExpense,
+  );
   const grossProfit = round2(salesRevenue - cogs);
   const netProfit = round2(totalRevenue - cogs - totalExpenses);
   // Cash actually collected minus cash actually paid out over the range —
@@ -158,6 +181,12 @@ export async function getFinancialSummary(range: DateRange) {
   expenses.forEach((e) => {
     expensesByCategory.set(e.category, round2((expensesByCategory.get(e.category) ?? 0) + e.amount));
   });
+  if (estimatedSalaryExpense > 0) {
+    expensesByCategory.set(
+      "Salaries (estimated)",
+      round2((expensesByCategory.get("Salaries (estimated)") ?? 0) + estimatedSalaryExpense),
+    );
+  }
 
   return {
     salesRevenue,
@@ -165,6 +194,7 @@ export async function getFinancialSummary(range: DateRange) {
     totalRevenue,
     costOfGoodsSold: round2(cogs),
     totalExpenses,
+    estimatedSalaryExpense,
     grossProfit,
     netProfit,
     cashOnHand,
