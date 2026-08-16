@@ -67,16 +67,23 @@ export async function recordSelfAttendance(
 
   const now = nowTimeString();
 
-  // Only gates a *face* check-out — the whole point is closing a gap the
-  // face kiosk specifically opens up (two instant scans), not restricting
-  // the pre-existing manual button, which has no such rule.
-  if (existing.exists && !existingData!.checkOut && method === "face") {
+  // Gates a checkout if *either* leg of the pair touches the face kiosk —
+  // checking only the current call's method let someone check in by face
+  // then immediately check out through the manual button (or the reverse),
+  // sailing straight past the rule since neither call alone was "face" on
+  // both sides. Fully-manual check-in/out pairs are still unaffected.
+  const existingMethod = existingData?.method as string | undefined;
+  if (
+    existing.exists &&
+    !existingData!.checkOut &&
+    (existingMethod === "face" || method === "face")
+  ) {
     const existingCheckIn = existingData!.checkIn as string;
     const elapsed = minutesBetween(existingCheckIn, now);
     if (elapsed < MIN_FACE_SHIFT_MINUTES) {
       throw new AppError(
         400,
-        `You checked in at ${existingCheckIn}. Face check-out is only available at least 2 hours after check-in.`,
+        `You checked in at ${existingCheckIn}. Check-out is only available at least 2 hours after a face check-in.`,
       );
     }
   }
