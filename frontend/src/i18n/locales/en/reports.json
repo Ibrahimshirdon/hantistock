@@ -12,14 +12,16 @@
       "custom": "Custom"
     },
     "summary": {
-      "orders": "Orders"
+      "orders": "Orders",
+      "refunded": "Refunded"
     },
     "table": {
       "orderNumber": "Order #",
       "customer": "Customer",
       "items": "Items",
       "payment": "Payment",
-      "empty": "No sales in this range."
+      "empty": "No sales in this range.",
+      "refunded": "-${{amount}} refunded"
     }
   },
   "inventoryReportPage": {

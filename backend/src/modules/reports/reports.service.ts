@@ -1,5 +1,5 @@
 import { db } from "../../config/firebase.js";
-import type { SalesOrder } from "../../shared/types/sales.types.js";
+import type { SalesOrder, SalesReturn } from "../../shared/types/sales.types.js";
 import type { Product } from "../../shared/types/inventory.types.js";
 
 function round2(n: number): number {
@@ -18,12 +18,35 @@ async function getCompletedSalesInRange({ dateFrom, dateTo }: DateRange): Promis
   const from = dateFrom.getTime();
   const to = dateTo.getTime();
   return snap.docs
-    .map((d) => d.data() as SalesOrder)
+    // Order documents don't store their own id field — it only exists as
+    // Firestore doc metadata, so it must be attached explicitly or
+    // matching against salesReturns.orderId below silently finds nothing.
+    .map((d) => ({ id: d.id, ...d.data() }) as SalesOrder)
     .filter((o) => {
       const ms = o.createdAt.toMillis();
       return ms >= from && ms <= to;
     })
     .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
+}
+
+// Same reasoning as the Dashboard's financial summary (reports.service.ts in
+// the finance module): a refunded order shouldn't keep reporting its full
+// original total as if the money were still in hand.
+async function getRefundTotalByOrder(orderIds: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (orderIds.length === 0) return map;
+  const chunks: string[][] = [];
+  for (let i = 0; i < orderIds.length; i += 30) chunks.push(orderIds.slice(i, i + 30));
+  const snaps = await Promise.all(
+    chunks.map((chunk) => db.collection("salesReturns").where("orderId", "in", chunk).get()),
+  );
+  snaps.forEach((snap) => {
+    snap.docs.forEach((d) => {
+      const ret = d.data() as SalesReturn;
+      map.set(ret.orderId, (map.get(ret.orderId) ?? 0) + ret.refundTotal);
+    });
+  });
+  return map;
 }
 
 export interface SalesReportRow {
@@ -35,23 +58,30 @@ export interface SalesReportRow {
   discountTotal: number;
   taxTotal: number;
   grandTotal: number;
+  refundedTotal: number;
   paymentMethod: string;
 }
 
 export async function getSalesReport(range: DateRange) {
   const orders = await getCompletedSalesInRange(range);
+  const refundTotalByOrder = await getRefundTotalByOrder(orders.map((o) => o.id));
 
-  const rows: SalesReportRow[] = orders.map((o) => ({
-    orderNumber: o.orderNumber,
-    date: new Date(o.createdAt.toMillis()).toLocaleString(),
-    customerName: o.customerName ?? "Walk-in",
-    itemCount: o.items.length,
-    subtotal: o.subtotal,
-    discountTotal: o.discountTotal,
-    taxTotal: o.taxTotal,
-    grandTotal: o.grandTotal,
-    paymentMethod: o.paymentMethod,
-  }));
+  const rows: SalesReportRow[] = orders.map((o) => {
+    const refundedTotal = refundTotalByOrder.get(o.id) ?? 0;
+    return {
+      orderNumber: o.orderNumber,
+      date: new Date(o.createdAt.toMillis()).toLocaleString(),
+      customerName: o.customerName ?? "Walk-in",
+      itemCount: o.items.length,
+      subtotal: o.subtotal,
+      discountTotal: o.discountTotal,
+      taxTotal: o.taxTotal,
+      // Net of any refund — see getRefundTotalByOrder above.
+      grandTotal: round2(Math.max(0, o.grandTotal - refundedTotal)),
+      refundedTotal: round2(refundedTotal),
+      paymentMethod: o.paymentMethod,
+    };
+  });
 
   const summary = {
     orderCount: orders.length,
@@ -59,6 +89,7 @@ export async function getSalesReport(range: DateRange) {
     discountTotal: round2(rows.reduce((s, r) => s + r.discountTotal, 0)),
     taxTotal: round2(rows.reduce((s, r) => s + r.taxTotal, 0)),
     grandTotal: round2(rows.reduce((s, r) => s + r.grandTotal, 0)),
+    refundedTotal: round2(rows.reduce((s, r) => s + r.refundedTotal, 0)),
   };
 
   return { summary, rows };

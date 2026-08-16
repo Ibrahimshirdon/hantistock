@@ -6,7 +6,9 @@ export interface SalesReportRow {
   subtotal: number;
   discountTotal: number;
   taxTotal: number;
+  // Net of any refund on this order — see refundedTotal.
   grandTotal: number;
+  refundedTotal: number;
   paymentMethod: string;
 }
 
@@ -16,6 +18,7 @@ export interface SalesReportSummary {
   discountTotal: number;
   taxTotal: number;
   grandTotal: number;
+  refundedTotal: number;
 }
 
 export interface InventoryReportRow {

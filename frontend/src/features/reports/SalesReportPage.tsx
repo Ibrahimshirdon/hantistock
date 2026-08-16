@@ -6,12 +6,14 @@ import {
   DollarSign,
   Percent,
   Receipt,
+  RotateCcw,
   ShoppingCart,
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 import { downloadSalesReport, getSalesReport } from "@/api/reports.api";
 import { getApiErrorMessage } from "@/api/client";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +32,7 @@ const TONE_CLASSES = {
   success: "bg-success/10 text-success",
   warning: "bg-warning/10 text-warning",
   purple: "bg-purple/10 text-purple",
+  destructive: "bg-destructive/10 text-destructive",
 } as const;
 
 function StatCard({
@@ -165,7 +168,7 @@ export function SalesReportPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         <StatCard
           label={t("salesReportPage.summary.orders")}
           value={String(report?.summary.orderCount ?? "—")}
@@ -190,6 +193,14 @@ export function SalesReportPage() {
           icon={Receipt}
           tone="purple"
         />
+        {(report?.summary.refundedTotal ?? 0) > 0 && (
+          <StatCard
+            label={t("salesReportPage.summary.refunded")}
+            value={`-$${(report?.summary.refundedTotal ?? 0).toFixed(2)}`}
+            icon={RotateCcw}
+            tone="destructive"
+          />
+        )}
         <StatCard
           label={t("common:fields.total")}
           value={`$${(report?.summary.grandTotal ?? 0).toFixed(2)}`}
@@ -231,7 +242,14 @@ export function SalesReportPage() {
               <TableCell>{row.customerName}</TableCell>
               <TableCell>{row.itemCount}</TableCell>
               <TableCell className="capitalize">{row.paymentMethod.replace("_", " ")}</TableCell>
-              <TableCell className="text-end">${row.grandTotal.toFixed(2)}</TableCell>
+              <TableCell className="text-end">
+                ${row.grandTotal.toFixed(2)}
+                {row.refundedTotal > 0 && (
+                  <Badge variant="destructive" className="ms-2">
+                    {t("salesReportPage.table.refunded", { amount: row.refundedTotal.toFixed(2) })}
+                  </Badge>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

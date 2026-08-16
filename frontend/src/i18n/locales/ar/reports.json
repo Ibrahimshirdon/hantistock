@@ -12,14 +12,16 @@
       "custom": "مخصص"
     },
     "summary": {
-      "orders": "الطلبات"
+      "orders": "الطلبات",
+      "refunded": "المسترد"
     },
     "table": {
       "orderNumber": "رقم الطلب",
       "customer": "العميل",
       "items": "العناصر",
       "payment": "الدفع",
-      "empty": "لا توجد مبيعات في هذه الفترة."
+      "empty": "لا توجد مبيعات في هذه الفترة.",
+      "refunded": "-${{amount}} مسترد"
     }
   },
   "inventoryReportPage": {
