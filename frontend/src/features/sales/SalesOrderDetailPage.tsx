@@ -16,7 +16,7 @@ import {
 } from "@/api/sales.api";
 import { getDeliveryByOrder } from "@/api/delivery.api";
 import { getApiErrorMessage } from "@/api/client";
-import type { Receipt, SalesOrder } from "@/types/sales.types";
+import type { Receipt, SalesOrder, SalesReturn } from "@/types/sales.types";
 import type { Delivery as DeliveryType } from "@/types/delivery.types";
 import { ReturnOrderDialog } from "./ReturnOrderDialog";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +90,16 @@ export function SalesOrderDetailPage() {
     }
     return map;
   }, [returns]);
+
+  // Receipts/invoices are write-once snapshots from checkout — a later
+  // return never touches them, so the refunded total is derived here from
+  // the same returns data the Returns card below already renders, rather
+  // than needing a backend field.
+  const totalRefunded = useMemo(
+    () => (returns ?? []).reduce((sum, ret) => sum + ret.refundTotal, 0),
+    [returns],
+  );
+  const netPaid = (receipt?.amountPaid ?? 0) - totalRefunded;
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: ["salesOrder", orderId] });
@@ -213,7 +223,7 @@ export function SalesOrderDetailPage() {
             </Button>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto bg-gray-100 p-4 print:p-0">
-            <ReceiptPaper order={order} receipt={receipt} t={t} />
+            <ReceiptPaper order={order} receipt={receipt} returns={returns} t={t} />
           </div>
         </DialogContent>
       </Dialog>
@@ -333,15 +343,34 @@ export function SalesOrderDetailPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
+            <CardTitle className="flex items-center justify-between text-base">
               {t("salesOrderDetailPage.receiptHeading", { receiptNumber: receipt?.receiptNumber })}
+              {totalRefunded > 0 && (
+                <Badge variant="destructive">
+                  {netPaid <= 0
+                    ? t("salesOrderDetailPage.fullyRefunded")
+                    : t("salesOrderDetailPage.partiallyRefunded")}
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {t("salesOrderDetailPage.receiptPaidLine", {
-              amount: receipt?.amountPaid.toFixed(2),
-              method: receipt ? t(`posPage.paymentMethods.${receipt.paymentMethod}`) : "",
-            })}
+          <CardContent className="flex flex-col gap-1 text-sm text-muted-foreground">
+            <p>
+              {t("salesOrderDetailPage.receiptPaidLine", {
+                amount: receipt?.amountPaid.toFixed(2),
+                method: receipt ? t(`posPage.paymentMethods.${receipt.paymentMethod}`) : "",
+              })}
+            </p>
+            {totalRefunded > 0 && (
+              <>
+                <p className="text-destructive">
+                  {t("salesOrderDetailPage.receiptRefundedLine", { amount: totalRefunded.toFixed(2) })}
+                </p>
+                <p className="font-medium text-foreground">
+                  {t("salesOrderDetailPage.receiptNetPaidLine", { amount: netPaid.toFixed(2) })}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -387,7 +416,7 @@ export function SalesOrderDetailPage() {
 
       {/* Print-only receipt — hidden on screen, shown when window.print() fires */}
       <div className="hidden print:block">
-        <ReceiptPaper order={order} receipt={receipt} t={t} />
+        <ReceiptPaper order={order} receipt={receipt} returns={returns} t={t} />
       </div>
     </div>
   );
@@ -516,12 +545,16 @@ function DeliveryCard({
 function ReceiptPaper({
   order,
   receipt,
+  returns,
   t,
 }: {
   order: SalesOrder;
   receipt: Receipt | undefined;
+  returns: SalesReturn[] | undefined;
   t: TFunction<["sales", "common"]>;
 }) {
+  const totalRefunded = (returns ?? []).reduce((sum, ret) => sum + ret.refundTotal, 0);
+  const netPaid = (receipt?.amountPaid ?? 0) - totalRefunded;
   // Receipt always renders as white paper — never inherits dark theme tokens.
   return (
     <div className="receipt-torn-edge relative mx-auto w-full max-w-xs p-5 pb-6 font-mono text-xs shadow-lg print:max-w-full print:p-0 print:pb-3 print:shadow-none"
@@ -623,6 +656,21 @@ function ReceiptPaper({
           </div>
         )}
       </div>
+      {totalRefunded > 0 && (
+        <>
+          <div className="border-t border-dashed" style={{ borderColor: "#d1d5db" }} />
+          <div className="flex flex-col gap-0.5 py-3">
+            <div className="flex justify-between font-medium" style={{ color: "#b91c1c" }}>
+              <span>{t("salesOrderDetailPage.receiptPaper.refunded")}</span>
+              <span>-${totalRefunded.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>{t("salesOrderDetailPage.receiptPaper.netPaid")}</span>
+              <span>${netPaid.toFixed(2)}</span>
+            </div>
+          </div>
+        </>
+      )}
       <div className="border-t border-dashed" style={{ borderColor: "#d1d5db" }} />
       <div className="flex flex-col items-center gap-0.5 pt-3 text-center" style={{ color: "#6b7280" }}>
         <p>{t("salesOrderDetailPage.receiptPaper.thankYou")}</p>
