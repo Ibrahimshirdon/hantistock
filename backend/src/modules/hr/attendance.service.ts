@@ -26,12 +26,12 @@ function minutesBetween(startHHMM: string, endHHMM: string): number {
   return endHour! * 60 + endMinute! - (startHour! * 60 + startMinute!);
 }
 
-// Minimum time a face check-in must stand before a face check-out is
-// accepted. Exists specifically to close the "walk up, scan twice in a
-// row" abuse case the face kiosk makes trivially easy compared to the
-// manual button — someone could otherwise register a full attendance day
+// Minimum time a check-in must stand before a check-out is accepted, for
+// self-service attendance regardless of method (face kiosk or the manual
+// "check in/out" button). Exists to close the "mark in, immediately mark
+// out" abuse case — someone could otherwise register a full attendance day
 // in a few seconds without actually being present for it.
-const MIN_FACE_SHIFT_MINUTES = 120;
+const MIN_SELF_SERVICE_SHIFT_MINUTES = 120;
 
 // Doc id == `${staffId}_${date}` — recording attendance again for the same
 // staff member on the same day corrects the existing record (upsert)
@@ -67,23 +67,16 @@ export async function recordSelfAttendance(
 
   const now = nowTimeString();
 
-  // Gates a checkout if *either* leg of the pair touches the face kiosk —
-  // checking only the current call's method let someone check in by face
-  // then immediately check out through the manual button (or the reverse),
-  // sailing straight past the rule since neither call alone was "face" on
-  // both sides. Fully-manual check-in/out pairs are still unaffected.
-  const existingMethod = existingData?.method as string | undefined;
-  if (
-    existing.exists &&
-    !existingData!.checkOut &&
-    (existingMethod === "face" || method === "face")
-  ) {
+  // Applies to every self-service checkout, regardless of which method
+  // recorded the check-in vs. the check-out — face+face, manual+manual, or
+  // a mix of the two all go through the same 2-hour minimum.
+  if (existing.exists && !existingData!.checkOut) {
     const existingCheckIn = existingData!.checkIn as string;
     const elapsed = minutesBetween(existingCheckIn, now);
-    if (elapsed < MIN_FACE_SHIFT_MINUTES) {
+    if (elapsed < MIN_SELF_SERVICE_SHIFT_MINUTES) {
       throw new AppError(
         400,
-        `You checked in at ${existingCheckIn}. Check-out is only available at least 2 hours after a face check-in.`,
+        `You checked in at ${existingCheckIn}. Check-out is only available at least 2 hours after check-in.`,
       );
     }
   }
