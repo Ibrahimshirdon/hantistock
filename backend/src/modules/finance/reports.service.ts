@@ -169,7 +169,11 @@ export async function getFinancialSummary(range: DateRange) {
     netProfit,
     cashOnHand,
     outstandingLoans,
-    orderCount: sales.length,
+    // A refunded order isn't a successful sale anymore — same "Completed"
+    // definition used on the Sales Orders list (refundedAmount <= 0), so
+    // this tile doesn't count a fully or partially refunded order toward
+    // the same total as one nobody asked money back on.
+    orderCount: sales.filter((o) => (refundTotalByOrder.get(o.id) ?? 0) <= 0).length,
     expensesByCategory: Array.from(expensesByCategory, ([category, amount]) => ({ category, amount })),
   };
 }
