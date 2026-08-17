@@ -95,6 +95,7 @@
       "pending": "Pending",
       "confirmed": "Confirmed",
       "completed": "Completed",
+      "refunded": "Refunded",
       "cancelled": "Cancelled"
     },
     "columns": {

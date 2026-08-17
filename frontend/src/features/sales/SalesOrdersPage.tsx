@@ -31,12 +31,19 @@ export function SalesOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
 
+  // "refunded" isn't a real order status (see salesOrder.service.ts — a
+  // refund never changes order.status), so it can't be sent to the backend
+  // as-is: both the "Completed" and "Refunded" filters query completed
+  // orders from the API, then split on refundedAmount client-side below.
+  const backendStatus =
+    statusFilter === "all" ? undefined : statusFilter === "refunded" ? "completed" : statusFilter;
+
   const { data: orders, isLoading } = useQuery({
-    queryKey: ["salesOrders", createdBy, statusFilter],
+    queryKey: ["salesOrders", createdBy, backendStatus],
     queryFn: () =>
       listSalesOrders({
         createdBy: createdBy === "all" ? undefined : createdBy,
-        status: statusFilter === "all" ? undefined : statusFilter,
+        status: backendStatus,
       }),
   });
   const { data: users } = useQuery({ queryKey: ["users", "all"], queryFn: () => listUsers() });
@@ -46,13 +53,15 @@ export function SalesOrdersPage() {
     [users],
   );
 
-  const filteredOrders = useMemo(
-    () =>
-      paymentFilter === "all"
-        ? (orders ?? [])
-        : (orders ?? []).filter((o) => o.paymentMethod === paymentFilter),
-    [orders, paymentFilter],
-  );
+  const filteredOrders = useMemo(() => {
+    let list = orders ?? [];
+    if (paymentFilter !== "all") list = list.filter((o) => o.paymentMethod === paymentFilter);
+    // "Completed" means genuinely successful — a refunded order moves to
+    // the "Refunded" filter instead, rather than appearing in both.
+    if (statusFilter === "completed") list = list.filter((o) => (o.refundedAmount ?? 0) <= 0);
+    if (statusFilter === "refunded") list = list.filter((o) => (o.refundedAmount ?? 0) > 0);
+    return list;
+  }, [orders, paymentFilter, statusFilter]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,6 +98,7 @@ export function SalesOrdersPage() {
               <SelectItem value="pending">{t("salesOrdersPage.statuses.pending")}</SelectItem>
               <SelectItem value="confirmed">{t("salesOrdersPage.statuses.confirmed")}</SelectItem>
               <SelectItem value="completed">{t("salesOrdersPage.statuses.completed")}</SelectItem>
+              <SelectItem value="refunded">{t("salesOrdersPage.statuses.refunded")}</SelectItem>
               <SelectItem value="cancelled">{t("salesOrdersPage.statuses.cancelled")}</SelectItem>
             </SelectContent>
           </Select>
@@ -160,17 +170,26 @@ export function SalesOrdersPage() {
               <TableCell>${order.grandTotal.toFixed(2)}</TableCell>
               <TableCell>{t(`posPage.paymentMethods.${order.paymentMethod}`)}</TableCell>
               <TableCell>
-                <Badge
-                  variant={
-                    order.status === "completed" ? "success"
+                {(() => {
+                  const refunded = order.status === "completed" && (order.refundedAmount ?? 0) > 0;
+                  const fullyRefunded = refunded && (order.refundedAmount ?? 0) >= order.grandTotal;
+                  const label = refunded
+                    ? fullyRefunded
+                      ? t("salesOrdersPage.statuses.refunded")
+                      : t("salesOrderDetailPage.partiallyRefunded")
+                    : t(`salesOrdersPage.statuses.${order.status}`);
+                  const variant = refunded
+                    ? "destructive"
+                    : order.status === "completed" ? "success"
                     : order.status === "confirmed" ? "secondary"
                     : order.status === "pending" ? "warning"
-                    : "destructive"
-                  }
-                  className="capitalize"
-                >
-                  {t(`salesOrdersPage.statuses.${order.status}`)}
-                </Badge>
+                    : "destructive";
+                  return (
+                    <Badge variant={variant} className="capitalize">
+                      {label}
+                    </Badge>
+                  );
+                })()}
               </TableCell>
               <TableCell>{new Date(order.createdAt._seconds * 1000).toLocaleString()}</TableCell>
             </TableRow>

@@ -95,6 +95,7 @@
       "pending": "قيد الانتظار",
       "confirmed": "مؤكد",
       "completed": "مكتمل",
+      "refunded": "مسترد",
       "cancelled": "ملغى"
     },
     "columns": {

@@ -69,6 +69,10 @@ export interface SalesOrder {
   completedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  // Not a stored field — attached by listSalesOrders() from the salesReturns
+  // collection so callers can tell a refunded order apart from a genuinely
+  // completed one without a separate returns query per order.
+  refundedAmount?: number;
 }
 
 export interface Invoice {

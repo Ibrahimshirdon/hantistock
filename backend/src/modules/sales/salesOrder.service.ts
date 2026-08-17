@@ -6,7 +6,7 @@ import { counterRef, formatSequence, readCounterValue } from "../../shared/utils
 import type { AuthenticatedUser } from "../../shared/types/auth.types.js";
 import type { Batch, Product } from "../../shared/types/inventory.types.js";
 import type { Address, CustomerProfile } from "../../shared/types/user.types.js";
-import type { Discount, SalesOrder, SalesOrderItem, TaxRate } from "../../shared/types/sales.types.js";
+import type { Discount, SalesOrder, SalesOrderItem, SalesReturn, TaxRate } from "../../shared/types/sales.types.js";
 import { computeDiscountAmount, isDiscountCurrentlyValid } from "./discount.service.js";
 import type { CreateSalesOrderInput } from "./salesOrder.types.js";
 import { notifyIfNewlyLowStock } from "../inventory/lowStockAlert.js";
@@ -433,6 +433,28 @@ export async function createSalesOrder(
   return { id: orderRef.id, invoiceId: invoiceRef.id, receiptId: receiptRef.id };
 }
 
+// Refund state is never written back onto the order document (see
+// salesReturn.service.ts), so a refunded order would otherwise still show
+// as a plain "completed" order here — this attaches the refunded total so
+// the list page can tell a genuinely successful sale apart from one that
+// was later refunded, without a migration of historical order docs.
+async function getRefundedTotalsByOrder(orderIds: string[]): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (orderIds.length === 0) return map;
+  const chunks: string[][] = [];
+  for (let i = 0; i < orderIds.length; i += 30) chunks.push(orderIds.slice(i, i + 30));
+  const snaps = await Promise.all(
+    chunks.map((chunk) => db.collection("salesReturns").where("orderId", "in", chunk).get()),
+  );
+  snaps.forEach((snap) =>
+    snap.docs.forEach((d) => {
+      const ret = d.data() as SalesReturn;
+      map.set(ret.orderId, (map.get(ret.orderId) ?? 0) + ret.refundTotal);
+    }),
+  );
+  return map;
+}
+
 export async function listSalesOrders(filters: {
   customerId?: string;
   status?: string;
@@ -444,7 +466,12 @@ export async function listSalesOrders(filters: {
   if (filters.createdBy) query = query.where("createdBy", "==", filters.createdBy);
   const snap = await query.get();
   const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as SalesOrder);
-  return orders.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+  const completedIds = orders.filter((o) => o.status === "completed").map((o) => o.id);
+  const refundedTotals = await getRefundedTotalsByOrder(completedIds);
+  const withRefunds = orders.map((o) => ({ ...o, refundedAmount: refundedTotals.get(o.id) ?? 0 }));
+
+  return withRefunds.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 }
 
 export async function getSalesOrderById(id: string) {

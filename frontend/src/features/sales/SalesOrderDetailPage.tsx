@@ -128,11 +128,24 @@ export function SalesOrderDetailPage() {
     return <p className="text-muted-foreground">{t("common:actions.loading")}</p>;
   }
 
+  // A refund never changes order.status (it stays "completed" — see
+  // salesReturn.service.ts), so the header badge has to be overridden here
+  // or a fully-refunded order would still read "Completed".
+  const isRefunded = order.status === "completed" && totalRefunded > 0;
+  const isFullyRefunded = isRefunded && netPaid <= 0;
+
   const statusVariant =
-    order.status === "completed" ? "success"
+    isRefunded ? "destructive"
+    : order.status === "completed" ? "success"
     : order.status === "confirmed" ? "secondary"
     : order.status === "pending" ? "warning"
     : "destructive";
+
+  const statusLabel = isRefunded
+    ? isFullyRefunded
+      ? t("salesOrderDetailPage.fullyRefunded")
+      : t("salesOrderDetailPage.partiallyRefunded")
+    : t(`salesOrderDetailPage.statuses.${order.status}`);
 
   return (
     <div className="flex flex-col gap-6">
@@ -156,7 +169,7 @@ export function SalesOrderDetailPage() {
         <div className="flex flex-wrap items-center justify-end gap-2">
           {order.fulfillmentType && <Badge variant="secondary">{order.fulfillmentType}</Badge>}
           <Badge variant={statusVariant} className="capitalize">
-            {t(`salesOrderDetailPage.statuses.${order.status}`)}
+            {statusLabel}
           </Badge>
 
           {/* Action buttons — only for online orders that aren't done */}

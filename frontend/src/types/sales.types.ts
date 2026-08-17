@@ -64,6 +64,10 @@ export interface SalesOrder {
   completedByName: string | null;
   completedAt: FirestoreTimestampLike | null;
   createdAt: FirestoreTimestampLike;
+  // Not stored — attached by the list endpoint from the salesReturns
+  // collection so a refunded order can be told apart from a genuinely
+  // completed one without a separate returns query per order.
+  refundedAmount?: number;
 }
 
 export interface Invoice {
