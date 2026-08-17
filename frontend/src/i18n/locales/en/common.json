@@ -119,6 +119,8 @@
     "approved": "Approved",
     "rejected": "Rejected",
     "completed": "Completed",
+    "refunded": "Refunded",
+    "partiallyRefunded": "Partially refunded",
     "outstanding": "Outstanding",
     "paidOff": "Paid off",
     "overdue": "Overdue",

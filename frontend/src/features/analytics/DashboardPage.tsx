@@ -794,17 +794,28 @@ export function DashboardPage() {
                         <Badge variant="secondary">{t(`dashboardPage.orderType.${order.type}`)}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            order.status === "completed"
+                        {(() => {
+                          // A refund never changes order.status (it stays
+                          // "completed" — see salesOrder.service.ts), so this
+                          // has to be overridden here or a refunded order
+                          // would still read "Completed" next to its full
+                          // original total.
+                          const refunded = order.status === "completed" && (order.refundedAmount ?? 0) > 0;
+                          const fullyRefunded = refunded && (order.refundedAmount ?? 0) >= order.grandTotal;
+                          const label = refunded
+                            ? fullyRefunded
+                              ? t("common:status.refunded")
+                              : t("common:status.partiallyRefunded")
+                            : t(`common:status.${order.status}`);
+                          const variant = refunded
+                            ? "destructive"
+                            : order.status === "completed"
                               ? "success"
                               : order.status === "pending"
                                 ? "warning"
-                                : "destructive"
-                          }
-                        >
-                          {t(`common:status.${order.status}`)}
-                        </Badge>
+                                : "destructive";
+                          return <Badge variant={variant}>{label}</Badge>;
+                        })()}
                       </TableCell>
                       <TableCell className="text-muted-foreground capitalize">
                         {order.paymentMethod.replace("_", " ")}

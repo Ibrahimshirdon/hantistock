@@ -119,6 +119,8 @@
     "approved": "تمت الموافقة",
     "rejected": "مرفوض",
     "completed": "مكتمل",
+    "refunded": "مسترد",
+    "partiallyRefunded": "مسترد جزئيًا",
     "outstanding": "مستحق",
     "paidOff": "مدفوع بالكامل",
     "overdue": "متأخر",

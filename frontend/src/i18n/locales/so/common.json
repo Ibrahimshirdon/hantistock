@@ -119,6 +119,8 @@
     "approved": "La ansixiyay",
     "rejected": "La diiday",
     "completed": "La dhammeeyay",
+    "refunded": "La celiyay",
+    "partiallyRefunded": "Qayb ayaa dib loogu celiyay",
     "outstanding": "Haray",
     "paidOff": "Si buuxda loo bixiyay",
     "overdue": "Wakhtigii dhaafay",
