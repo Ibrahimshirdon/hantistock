@@ -19,6 +19,15 @@ export function PwaUpdater() {
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
       if (!registration) return;
+      // Without this, a browser that already has an old service worker
+      // installed (e.g. from earlier the same day) serves that stale
+      // precached app shell on every fresh load — including a full
+      // close-and-reopen of the browser — until the first 60s poll below
+      // happens to fire, so whatever bug a same-day deploy just fixed
+      // keeps appearing to still be broken. Checking immediately on
+      // registration means a stale shell is caught (and reloaded via
+      // needRefresh below) on the very next load, not up to a minute later.
+      registration.update();
       setInterval(() => registration.update(), UPDATE_CHECK_INTERVAL_MS);
     },
   });
