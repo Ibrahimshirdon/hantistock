@@ -20,8 +20,7 @@
       "customer": "Customer",
       "items": "Items",
       "payment": "Payment",
-      "empty": "No sales in this range.",
-      "refunded": "-${{amount}} refunded"
+      "empty": "No sales in this range."
     }
   },
   "inventoryReportPage": {

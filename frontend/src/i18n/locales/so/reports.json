@@ -20,8 +20,7 @@
       "customer": "Macmiilka",
       "items": "Alaabta",
       "payment": "Lacag-bixinta",
-      "empty": "Wax iib ah kuma jiro xilligan.",
-      "refunded": "-${{amount}} dib loogu celiyay"
+      "empty": "Wax iib ah kuma jiro xilligan."
     }
   },
   "inventoryReportPage": {

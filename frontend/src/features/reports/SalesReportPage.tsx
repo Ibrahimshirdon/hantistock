@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { downloadSalesReport, getSalesReport } from "@/api/reports.api";
 import { getApiErrorMessage } from "@/api/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -242,14 +241,7 @@ export function SalesReportPage() {
               <TableCell>{row.customerName}</TableCell>
               <TableCell>{row.itemCount}</TableCell>
               <TableCell className="capitalize">{row.paymentMethod.replace("_", " ")}</TableCell>
-              <TableCell className="text-end">
-                ${row.grandTotal.toFixed(2)}
-                {row.refundedTotal > 0 && (
-                  <Badge variant="destructive" className="ms-2">
-                    {t("salesReportPage.table.refunded", { amount: row.refundedTotal.toFixed(2) })}
-                  </Badge>
-                )}
-              </TableCell>
+              <TableCell className="text-end">${row.grandTotal.toFixed(2)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

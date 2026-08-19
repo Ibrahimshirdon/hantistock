@@ -20,8 +20,7 @@
       "customer": "العميل",
       "items": "العناصر",
       "payment": "الدفع",
-      "empty": "لا توجد مبيعات في هذه الفترة.",
-      "refunded": "-${{amount}} مسترد"
+      "empty": "لا توجد مبيعات في هذه الفترة."
     }
   },
   "inventoryReportPage": {
