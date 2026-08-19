@@ -2,6 +2,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../../config/firebase.js";
 import { AppError } from "../../shared/utils/AppError.js";
 import { createExpense, deleteExpense } from "../finance/expense.service.js";
+import { businessDateString } from "../../shared/utils/businessTime.js";
 import type { AuthenticatedUser } from "../../shared/types/auth.types.js";
 import type { StaffSalary, SalaryPayment } from "../../shared/types/hr.types.js";
 import type { SetSalaryInput } from "./salary.types.js";
@@ -9,11 +10,11 @@ import type { SetSalaryInput } from "./salary.types.js";
 const collection = () => db.collection("salaries");
 const paymentsCollection = () => db.collection("salaryPayments");
 
-// "YYYY-MM" from the server clock — same UTC-based date-string convention
+// "YYYY-MM" from the business's own timezone — same convention
 // attendance.service.ts's todayDateString() uses, never trusting anything
 // client-supplied for "what period is this payment for."
 function currentPeriod(): string {
-  return new Date().toISOString().slice(0, 7);
+  return businessDateString().slice(0, 7);
 }
 
 // Doc id == staffId, so this is a plain upsert: setting a new salary for a

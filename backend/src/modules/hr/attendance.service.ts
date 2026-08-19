@@ -2,6 +2,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../../config/firebase.js";
 import { AppError } from "../../shared/utils/AppError.js";
 import { recordAuditLog } from "../../shared/utils/auditLog.js";
+import { businessDateString, businessTimeString } from "../../shared/utils/businessTime.js";
 import type { AuthenticatedUser } from "../../shared/types/auth.types.js";
 import type { AttendanceRecord } from "../../shared/types/hr.types.js";
 import type { UserDoc } from "../../shared/types/user.types.js";
@@ -9,13 +10,8 @@ import type { RecordAttendanceInput, SetAttendanceMethodInput } from "./attendan
 
 const collection = () => db.collection("attendanceRecords");
 
-function todayDateString() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function nowTimeString() {
-  return new Date().toTimeString().slice(0, 5);
-}
+const todayDateString = businessDateString;
+const nowTimeString = businessTimeString;
 
 // Both times are "HH:MM" from the same calendar day (self-service records
 // never span midnight — see recordSelfAttendance), so a straight minutes
