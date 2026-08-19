@@ -13,6 +13,25 @@ import { receiveStock } from "../inventory/stock.service.js";
 
 const collection = () => db.collection("supplierProducts");
 
+// Shared by the first-time submit-to-inventory flow and by editing a
+// product that's already linked — a supplier's free-text category name
+// maps to a real Category doc, reusing an existing one by name rather than
+// creating a duplicate every time.
+async function findOrCreateCategoryId(name: string): Promise<string> {
+  const snap = await db.collection("categories").where("name", "==", name).limit(1).get();
+  if (!snap.empty) return snap.docs[0]!.id;
+  const ref = db.collection("categories").doc();
+  await ref.set({
+    name,
+    description: null,
+    parentCategoryId: null,
+    imageUrl: null,
+    isActive: true,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+  return ref.id;
+}
+
 export async function createSupplierProduct(input: CreateSupplierProductInput, actor: AuthenticatedUser) {
   const [companySnap, userSnap] = await Promise.all([
     db.collection("supplierCompanies").doc(input.companyId).get(),
@@ -204,8 +223,35 @@ export async function updateSupplierProduct(
   input: UpdateSupplierProductInput,
   actor: AuthenticatedUser,
 ) {
-  const { ref } = await getOwnedSupplierProduct(id, actor);
+  const { ref, product } = await getOwnedSupplierProduct(id, actor);
   await ref.update({ ...input, updatedAt: FieldValue.serverTimestamp() });
+
+  // Mirrors product.service.ts's admin -> supplier sync, in the other
+  // direction: once a supplier product has been submitted into inventory
+  // (linkedProductId set), its identity and cost fields should keep
+  // tracking the supplier's own edits the same way theirs track an admin's.
+  // Deliberately excludes sellingPrice — the store's own POS retail price,
+  // which may carry a deliberate markup over the supplier's rate — and
+  // quantityInStock, since stock only ever moves into inventory through the
+  // batch-tracked "submit to inventory" flow (applySupplierProductToInventory
+  // -> receiveStock), never by editing a warehouse count directly.
+  if (product.linkedProductId) {
+    const productUpdates: Record<string, unknown> = {};
+    if (input.name !== undefined) productUpdates.name = input.name;
+    if (input.description !== undefined) productUpdates.description = input.description;
+    if (input.unitType !== undefined) productUpdates.unit = input.unitType;
+    if (input.purchasePrice !== undefined) productUpdates.costPrice = input.purchasePrice;
+    if (input.taxRateId !== undefined) productUpdates.taxRateId = input.taxRateId;
+    if (input.category !== undefined) {
+      productUpdates.categoryId = await findOrCreateCategoryId(input.category);
+      productUpdates.categoryName = input.category;
+    }
+    if (Object.keys(productUpdates).length > 0) {
+      productUpdates.updatedAt = FieldValue.serverTimestamp();
+      await db.collection("products").doc(product.linkedProductId).update(productUpdates);
+    }
+  }
+
   return { id };
 }
 
@@ -241,26 +287,7 @@ export async function applySupplierProductToInventory(
 
   let productId = product.linkedProductId;
   if (!productId) {
-    const categorySnap = await db
-      .collection("categories")
-      .where("name", "==", product.category)
-      .limit(1)
-      .get();
-    let categoryId: string;
-    if (categorySnap.empty) {
-      const categoryRef = db.collection("categories").doc();
-      await categoryRef.set({
-        name: product.category,
-        description: null,
-        parentCategoryId: null,
-        imageUrl: null,
-        isActive: true,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-      categoryId = categoryRef.id;
-    } else {
-      categoryId = categorySnap.docs[0]!.id;
-    }
+    const categoryId = await findOrCreateCategoryId(product.category);
 
     const productRef = db.collection("products").doc();
     await productRef.set({
