@@ -223,6 +223,27 @@ export async function updateProduct(id: string, input: UpdateProductInput) {
 
   await ref.update(updates);
 
+  // A product created from a supplier's submission stays linked to that
+  // supplierProducts doc via supplierProductId (see
+  // applySupplierProductToInventory in supplierProduct.service.ts), but
+  // that link was only ever used to route later stock receipts to the
+  // right product — an admin renaming or re-describing it here never
+  // reached the supplier's own listing, so the Supplier Stock page and the
+  // supplier's own Products page kept showing the original submitted name
+  // forever. Mirror identity fields only; pricing/stock intentionally stay
+  // independent since the supplier's own commercial terms (wholesalePrice,
+  // quantityInStock, etc.) are allowed to differ from the store's.
+  if (current.supplierProductId) {
+    const supplierUpdates: Record<string, unknown> = {};
+    if (input.name !== undefined) supplierUpdates.name = input.name;
+    if (input.description !== undefined) supplierUpdates.description = input.description;
+    if (updates.categoryName !== undefined) supplierUpdates.category = updates.categoryName;
+    if (Object.keys(supplierUpdates).length > 0) {
+      supplierUpdates.updatedAt = FieldValue.serverTimestamp();
+      await db.collection("supplierProducts").doc(current.supplierProductId).update(supplierUpdates);
+    }
+  }
+
   await notifyIfNewlyLowStock([
     {
       productId: id,
