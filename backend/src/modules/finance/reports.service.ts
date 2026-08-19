@@ -2,7 +2,7 @@ import { db } from "../../config/firebase.js";
 import type { SalesOrder, SalesReturn } from "../../shared/types/sales.types.js";
 import type { Product } from "../../shared/types/inventory.types.js";
 import type { Expense, OtherIncome } from "../../shared/types/finance.types.js";
-import type { Loan } from "../../shared/types/loan.types.js";
+import type { Loan, LoanRepayment } from "../../shared/types/loan.types.js";
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -111,12 +111,40 @@ async function getOutstandingLoansTotal(): Promise<number> {
   return round2(total);
 }
 
+// A sale paid on loan/store-credit earns revenue immediately (accrual
+// basis — the sale genuinely happened) but brings in no actual money, so
+// it must not also count toward cash on hand. That cash only shows up
+// later, if and when the customer repays.
+function getLoanFinancedTotal(sales: SalesOrder[], refundTotalByOrder: Map<string, number>): number {
+  return round2(
+    sales
+      .filter((o) => o.paymentMethod === "loan")
+      .reduce((sum, o) => sum + Math.max(0, o.grandTotal - (refundTotalByOrder.get(o.id) ?? 0)), 0),
+  );
+}
+
+// A wallet repayment moves money the customer already had sitting in
+// their wallet — it isn't new cash arriving at the business, so it's
+// excluded here the same way a wallet-paid POS sale would be; only a
+// repayment via cash or mobile money is an actual cash inflow.
+async function getCashLoanRepaymentsInRange({ dateFrom, dateTo }: DateRange): Promise<LoanRepayment[]> {
+  const snap = await db
+    .collection("loanRepayments")
+    .where("createdAt", ">=", dateFrom)
+    .where("createdAt", "<=", dateTo)
+    .get();
+  return snap.docs
+    .map((d) => d.data() as LoanRepayment)
+    .filter((r) => r.method !== "wallet");
+}
+
 export async function getFinancialSummary(range: DateRange) {
-  const [sales, expenses, otherIncome, outstandingLoans] = await Promise.all([
+  const [sales, expenses, otherIncome, outstandingLoans, cashRepayments] = await Promise.all([
     getCompletedSalesInRange(range),
     getExpensesInRange(range),
     getOtherIncomeInRange(range),
     getOutstandingLoansTotal(),
+    getCashLoanRepaymentsInRange(range),
   ]);
   const returns = await getReturnsForOrders(sales.map((o) => o.id));
 
@@ -152,7 +180,14 @@ export async function getFinancialSummary(range: DateRange) {
   // totaled across the whole period. Deliberately excludes COGS: cost of
   // goods sold is an accounting valuation of inventory already on hand,
   // not itself a cash movement recorded in this range.
-  const cashOnHand = round2(totalRevenue - totalExpenses);
+  //
+  // totalRevenue is accrual — a loan-financed sale earns revenue the
+  // moment it's made even though no money changed hands yet, so it's
+  // subtracted back out here; a later cash/mobile-money repayment against
+  // that loan (or any other) is real cash arriving and gets added in.
+  const loanFinancedTotal = getLoanFinancedTotal(sales, refundTotalByOrder);
+  const cashRepaymentsTotal = round2(cashRepayments.reduce((sum, r) => sum + r.amount, 0));
+  const cashOnHand = round2(totalRevenue - loanFinancedTotal + cashRepaymentsTotal - totalExpenses);
 
   const expensesByCategory = new Map<string, number>();
   expenses.forEach((e) => {
@@ -179,10 +214,11 @@ export async function getFinancialSummary(range: DateRange) {
 }
 
 export async function getCashFlow(range: DateRange) {
-  const [sales, expenses, otherIncome] = await Promise.all([
+  const [sales, expenses, otherIncome, cashRepayments] = await Promise.all([
     getCompletedSalesInRange(range),
     getExpensesInRange(range),
     getOtherIncomeInRange(range),
+    getCashLoanRepaymentsInRange(range),
   ]);
 
   const byDate = new Map<string, { cashIn: number; cashOut: number }>();
@@ -191,11 +227,19 @@ export async function getCashFlow(range: DateRange) {
     return byDate.get(key)!;
   }
 
+  // Same reasoning as getFinancialSummary's cashOnHand: a loan-financed
+  // sale is a real sale but not real cash yet, so it's left out here; a
+  // later cash/mobile-money repayment against a loan is counted on the
+  // day it actually came in instead.
   sales.forEach((o) => {
+    if (o.paymentMethod === "loan") return;
     bucket(dateKey(o.createdAt.toMillis())).cashIn += o.grandTotal;
   });
   otherIncome.forEach((i) => {
     bucket(dateKey(i.date.toMillis())).cashIn += i.amount;
+  });
+  cashRepayments.forEach((r) => {
+    bucket(dateKey(r.createdAt.toMillis())).cashIn += r.amount;
   });
   expenses.forEach((e) => {
     bucket(dateKey(e.date.toMillis())).cashOut += e.amount;
