@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import axios from "axios";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -26,6 +27,13 @@ interface AuthContextValue {
   // completed a WebAuthn/backup-code challenge yet — every other role, and
   // an admin without 2FA enabled, is always true.
   mfaSatisfied: boolean;
+  // True when Firebase confirms a persisted session (firebaseUser is set)
+  // but fetching this app's own profile failed for a reason that says
+  // nothing about whether that session is actually valid — a network blip
+  // or the backend still waking up, not an expired/invalid token. Lets
+  // ProtectedRoute offer a retry instead of bouncing to /login, which
+  // would otherwise look exactly like being logged out.
+  profileLoadFailed: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
   registerCustomer: (input: RegisterCustomerInput) => Promise<UserProfile>;
   logout: () => Promise<void>;
@@ -96,6 +104,27 @@ async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
   }
 }
 
+// A 401/403 from our own backend means the token/role really is invalid —
+// treat that as "not logged in." Anything else (no response at all, a 5xx,
+// a timeout) is transient: the persisted Firebase session itself is still
+// fine, so it must not be treated as a logout.
+function isAuthError(err: unknown): boolean {
+  return axios.isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403);
+}
+
+// Retries a few times with a short backoff before giving up — long enough
+// to ride out a Render cold start without the user ever seeing anything,
+// short enough not to leave a real failure spinning silently.
+async function fetchProfileWithRetry(retriesLeft = 3, delayMs = 1500): Promise<UserProfile> {
+  try {
+    return await getMe();
+  } catch (err) {
+    if (isAuthError(err) || retriesLeft <= 0) throw err;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return fetchProfileWithRetry(retriesLeft - 1, delayMs);
+  }
+}
+
 async function computeMfaSatisfied(user: FirebaseUser, profile: UserProfile | null) {
   if (!profile || profile.role !== "admin" || !profile.mfaEnabled) return true;
   const result = await withTimeout(user.getIdTokenResult(), 8000);
@@ -119,21 +148,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [mfaSatisfied, setMfaSatisfied] = useState(true);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
       setFirebaseUser(user);
       if (user) {
         try {
-          const userProfile = await getMe();
+          const userProfile = await fetchProfileWithRetry();
           setProfile(userProfile);
+          setProfileLoadFailed(false);
           setMfaSatisfied(await computeMfaSatisfied(user, userProfile));
-        } catch {
-          setProfile(null);
+        } catch (err) {
+          if (isAuthError(err)) {
+            // The persisted Firebase session is real, but our backend says
+            // it's no longer valid (e.g. the account was disabled) — this
+            // is a genuine logout, not a connectivity problem.
+            setProfile(null);
+            setProfileLoadFailed(false);
+          } else {
+            // Firebase itself still has a valid persisted session; only the
+            // profile fetch failed. Leave firebaseUser/profile alone so
+            // ProtectedRoute can offer a retry instead of the login form.
+            setProfileLoadFailed(true);
+          }
           setMfaSatisfied(true);
         }
       } else {
         setProfile(null);
+        setProfileLoadFailed(false);
         setMfaSatisfied(true);
       }
       setLoading(false);
@@ -182,7 +225,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function refreshProfile() {
-    setProfile(await getMe());
+    // Also used as the retry action after a failed session restore (see
+    // ProtectedRoute), so it clears profileLoadFailed on success and keeps
+    // it set on another failure, the same distinction the initial restore
+    // makes.
+    try {
+      const userProfile = await fetchProfileWithRetry(0);
+      setProfile(userProfile);
+      setProfileLoadFailed(false);
+    } catch (err) {
+      if (isAuthError(err)) {
+        setProfile(null);
+        setProfileLoadFailed(false);
+      } else {
+        setProfileLoadFailed(true);
+      }
+      throw err;
+    }
   }
 
   return (
@@ -192,6 +251,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         mfaSatisfied,
+        profileLoadFailed,
         login,
         registerCustomer,
         logout,
