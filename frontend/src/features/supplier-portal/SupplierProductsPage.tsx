@@ -603,14 +603,26 @@ export function SupplierProductsPage() {
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>{t("productsPage.fields.minimumStockLevel")}</Label>
-              <Input
-                type="number"
-                min={0}
-                value={form.minimumStockLevel}
-                onChange={(e) => setForm({ ...form, minimumStockLevel: Number(e.target.value) })}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label>{t("productsPage.fields.minimumStockLevel")}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.minimumStockLevel}
+                  onChange={(e) => setForm({ ...form, minimumStockLevel: Number(e.target.value) })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label>{t("productsPage.fields.purchasePrice")}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.purchasePrice}
+                  onChange={(e) => setForm({ ...form, purchasePrice: Number(e.target.value) })}
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>{t("productsPage.fields.taxRate")}</Label>
