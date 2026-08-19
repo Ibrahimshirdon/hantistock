@@ -41,7 +41,12 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use(morgan(env.nodeEnv === "development" ? "dev" : "combined"));
+// "combined" (the previous production format) never logs response time at
+// all — the exact number needed to tell "slow request" from "server never
+// got hit," e.g. while diagnosing a slow login. This format includes it in
+// both environments; :status is empty until the response actually finishes,
+// so it also flags a request that's still hanging.
+app.use(morgan(":method :url :status :response-time ms - :res[content-length]b"));
 app.use(activityTracker);
 
 app.get("/api/health", (_req, res) => {

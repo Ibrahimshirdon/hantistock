@@ -35,9 +35,26 @@ export async function resolveLoginIdentifier(identifier: string) {
   return data.data;
 }
 
+// Login fires this twice almost simultaneously — once explicitly (see
+// AuthContext.login()) and once more from the onAuthStateChanged listener
+// reacting to the same sign-in — which used to mean two redundant
+// GET /auth/me round trips (each doing its own Firestore reads) for a
+// single login. Reusing the in-flight promise collapses those into one
+// request without ever serving stale data: the slot clears the moment the
+// call settles, so a later call (e.g. after editing the profile) still
+// hits the network fresh.
+let inFlightMe: Promise<UserProfile> | null = null;
+
 export async function getMe() {
-  const { data } = await apiClient.get<ApiSuccess<UserProfile>>("/auth/me");
-  return data.data;
+  if (!inFlightMe) {
+    inFlightMe = apiClient
+      .get<ApiSuccess<UserProfile>>("/auth/me")
+      .then((res) => res.data.data)
+      .finally(() => {
+        inFlightMe = null;
+      });
+  }
+  return inFlightMe;
 }
 
 export async function createUser(input: CreateUserByAdminInput) {

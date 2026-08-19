@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { auth } from "../config/firebase.js";
 import type { UserRole } from "../shared/types/auth.types.js";
 import { AppError } from "../shared/utils/AppError.js";
+import { time } from "../shared/utils/timing.js";
 
 export async function verifyToken(
   req: Request,
@@ -15,7 +16,11 @@ export async function verifyToken(
     }
 
     const idToken = header.slice("Bearer ".length);
-    const decoded = await auth.verifyIdToken(idToken);
+    // verifyIdToken is normally local (checked against Google's public
+    // certs, cached in-process) and fast — but that cache is empty on a
+    // cold process start, when it instead has to fetch those certs over
+    // the network first. Timing it here is what tells the two apart.
+    const decoded = await time(`verifyIdToken ${req.method} ${req.path}`, () => auth.verifyIdToken(idToken));
 
     const role = decoded.role as UserRole | undefined;
     if (!role) {

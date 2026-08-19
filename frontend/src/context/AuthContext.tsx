@@ -51,6 +51,51 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | "tim
   return Promise.race([promise, new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), ms))]);
 }
 
+// Distinct from withTimeout above: there's no safe fallback value for "did
+// login succeed," so a login that's still hanging at the deadline has to
+// fail loudly with a message the user can act on, instead of leaving the
+// button on "Signing in..." forever.
+const LOGIN_TIMEOUT_MS = 10_000;
+
+class LoginTimeoutError extends Error {
+  constructor() {
+    super("Login is taking longer than expected. Check your connection and try again.");
+    this.name = "LoginTimeoutError";
+  }
+}
+
+function withDeadline<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new LoginTimeoutError()), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err: unknown) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
+
+// Per-step timing for the login flow, logged to the console so a slow
+// login can be pinned to a specific step (Firebase sign-in vs. this app's
+// own /auth/me) instead of just "login was slow" — the same diagnosis the
+// backend's morgan logging and verifyIdToken/getMe timing give server-side.
+async function timed<T>(label: string, fn: () => Promise<T>): Promise<T> {
+  const start = performance.now();
+  try {
+    const result = await fn();
+    console.info(`[login-timing] ${label}: ${Math.round(performance.now() - start)}ms`);
+    return result;
+  } catch (err) {
+    console.info(`[login-timing] ${label} failed after ${Math.round(performance.now() - start)}ms`);
+    throw err;
+  }
+}
+
 async function computeMfaSatisfied(user: FirebaseUser, profile: UserProfile | null) {
   if (!profile || profile.role !== "admin" || !profile.mfaEnabled) return true;
   const result = await withTimeout(user.getIdTokenResult(), 8000);
@@ -97,10 +142,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(email: string, password: string): Promise<LoginResult> {
-    const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-    const userProfile = await getMe();
+    const start = performance.now();
+    try {
+      return await withDeadline(loginSteps(email, password), LOGIN_TIMEOUT_MS);
+    } finally {
+      console.info(`[login-timing] total: ${Math.round(performance.now() - start)}ms`);
+    }
+  }
+
+  async function loginSteps(email: string, password: string): Promise<LoginResult> {
+    const credential = await timed("signInWithEmailAndPassword", () =>
+      signInWithEmailAndPassword(firebaseAuth, email, password),
+    );
+    // Redirecting needs the role (to know which home route to send them
+    // to), so getMe() can't be skipped — but nothing else is awaited
+    // before the caller (LoginPage) can navigate once this resolves.
+    const userProfile = await timed("getMe", () => getMe());
     setProfile(userProfile);
-    const satisfied = await computeMfaSatisfied(credential.user, userProfile);
+    const satisfied = await timed("computeMfaSatisfied", () => computeMfaSatisfied(credential.user, userProfile));
     setMfaSatisfied(satisfied);
     return { profile: userProfile, mfaSatisfied: satisfied };
   }

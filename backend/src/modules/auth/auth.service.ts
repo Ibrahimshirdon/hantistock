@@ -4,6 +4,7 @@ import { AppError } from "../../shared/utils/AppError.js";
 import { recordAuditLog } from "../../shared/utils/auditLog.js";
 import { uploadBuffer } from "../../shared/utils/uploadFile.js";
 import { createNotification } from "../../shared/utils/notifications.js";
+import { time } from "../../shared/utils/timing.js";
 import type { AuthenticatedUser, UserRole } from "../../shared/types/auth.types.js";
 import type { UserDoc } from "../../shared/types/user.types.js";
 import type {
@@ -189,13 +190,17 @@ export async function createUserByAdmin(input: CreateUserByAdminInput, actor: Au
 }
 
 export async function getMe(uid: string) {
-  const userSnap = await db.collection("users").doc(uid).get();
+  const userSnap = await time("getMe: users read", () => db.collection("users").doc(uid).get());
   if (!userSnap.exists) {
     throw new AppError(404, "User profile not found");
   }
   const user = userSnap.data() as UserDoc;
 
-  const profileSnap = await db.collection(PROFILE_COLLECTION[user.role]).doc(uid).get();
+  // Depends on user.role from the read above, so it can't run in parallel
+  // with it — this is the second of getMe's two sequential Firestore reads.
+  const profileSnap = await time("getMe: role-profile read", () =>
+    db.collection(PROFILE_COLLECTION[user.role]).doc(uid).get(),
+  );
 
   return { ...user, profile: profileSnap.exists ? profileSnap.data() : null };
 }
@@ -406,11 +411,9 @@ export async function resolveLoginIdentifier(identifier: string) {
     return { email: identifier };
   }
 
-  const snap = await db
-    .collection("users")
-    .where("username", "==", normalizeUsername(identifier))
-    .limit(1)
-    .get();
+  const snap = await time("resolveLoginIdentifier: username query", () =>
+    db.collection("users").where("username", "==", normalizeUsername(identifier)).limit(1).get(),
+  );
   if (snap.empty) {
     throw new AppError(404, "No account found with that username");
   }
