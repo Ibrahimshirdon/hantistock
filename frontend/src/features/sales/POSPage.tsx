@@ -342,7 +342,7 @@ export function POSPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex h-15 flex-col gap-2 p-2.5">
+                <div className="flex min-h-15 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
                   <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
                 </div>
@@ -421,19 +421,21 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info — fixed heights throughout, not line-clamp/flex-grow
-                    based: -webkit-line-clamp inside a flex-grow child can
-                    compute to zero intrinsic height at some browser zoom
-                    levels (confirmed: names vanished at 90-100% zoom, only
-                    reappeared at 80%), so nothing here depends on either
-                    for its size — every value is a fixed number of pixels
-                    the browser can't collapse regardless of zoom. Plain
-                    truncate (single line, no -webkit-box) doesn't share
-                    that bug, so name and price sit on one row safely. */}
-                <div className="flex h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
+                {/* Info — nothing here can ever clip its own content. Fixed
+                    heights alone weren't enough (confirmed still blank on a
+                    real machine at 100% zoom after that fix): a forced
+                    browser/OS minimum font size overrides the CSS font-size
+                    here, and combined with overflow-hidden/truncate the
+                    inflated text was being clipped down to nothing instead
+                    of just displaying larger. Using min-height (grows if it
+                    has to) and no overflow-hidden/truncate on the name means
+                    however large the browser decides to render this text,
+                    it still fully displays — worst case the card gets a
+                    little taller instead of the text vanishing. */}
+                <div className="flex min-h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <p
-                      className="min-w-0 flex-1 truncate text-[11px] font-medium text-foreground"
+                      className="min-w-0 flex-1 text-[11px] font-medium text-foreground"
                       title={product.name}
                     >
                       {product.name}
