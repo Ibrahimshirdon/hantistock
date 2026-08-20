@@ -87,6 +87,16 @@ export default function App() {
               <Route path="/mfa-challenge" element={<MfaChallengePage />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
 
+              {/* No dedicated home page — "/" only ever exists to send a
+                  visitor somewhere else. With no allowed roles, ProtectedRoute
+                  always falls through to its role-home redirect for anyone
+                  signed in, and to /login for anyone who isn't — the same
+                  session check every other route already gets, so landing on
+                  the bare domain no longer skips it and looks like a logout. */}
+              <Route element={<ProtectedRoute allowedRoles={[]} />}>
+                <Route path="/" element={<PageLoader />} />
+              </Route>
+
               <Route element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]} />}>
                 <Route path="/app" element={<DashboardLayout />}>
                   <Route path="dashboard" element={<DashboardPage />} />
