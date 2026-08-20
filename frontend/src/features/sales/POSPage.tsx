@@ -421,21 +421,22 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info — nothing here can ever clip its own content. Fixed
-                    heights alone weren't enough (confirmed still blank on a
-                    real machine at 100% zoom after that fix): a forced
-                    browser/OS minimum font size overrides the CSS font-size
-                    here, and combined with overflow-hidden/truncate the
-                    inflated text was being clipped down to nothing instead
-                    of just displaying larger. Using min-height (grows if it
-                    has to) and no overflow-hidden/truncate on the name means
-                    however large the browser decides to render this text,
-                    it still fully displays — worst case the card gets a
-                    little taller instead of the text vanishing. */}
+                {/* Info — found it: an arbitrary text-[11px]/text-[10px]
+                    pixel value doesn't scale with Chrome's "Font size"
+                    setting, but the rem-based container around it does —
+                    confirmed the name/price reappeared the moment that
+                    setting was lowered to Small. Mixing a literal-px font
+                    size with a rem-based layout is exactly the kind of
+                    mismatch that setting can blow up into a full collapse.
+                    Using Tailwind's standard text-xs (rem-based, like
+                    everything else here) instead keeps it scaling in step
+                    with its container at any font-size setting, and
+                    min-height (not a hard height) means it still can't
+                    clip even if something else scales unevenly again. */}
                 <div className="flex min-h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
                   <div className="flex items-center justify-between gap-2">
                     <p
-                      className="min-w-0 flex-1 text-[11px] font-medium text-foreground"
+                      className="min-w-0 flex-1 text-xs font-medium text-foreground"
                       title={product.name}
                     >
                       {product.name}
@@ -444,7 +445,7 @@ export function POSPage() {
                       ${product.sellingPrice.toFixed(2)}
                     </span>
                   </div>
-                  <div className="text-end text-[10px] tabular-nums text-muted-foreground">
+                  <div className="text-end text-xs tabular-nums text-muted-foreground">
                     {product.totalStock} {product.unit}
                   </div>
                 </div>
