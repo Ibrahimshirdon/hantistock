@@ -342,7 +342,7 @@ export function POSPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex flex-col gap-2 p-2.5">
+                <div className="flex h-20 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
                   <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
                 </div>
@@ -421,10 +421,16 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info */}
-                <div className="flex min-h-13 flex-1 flex-col justify-between gap-1 p-2.5">
+                {/* Info — fixed heights throughout, not line-clamp/flex-grow
+                    based: -webkit-line-clamp inside a flex-grow child can
+                    compute to zero intrinsic height at some browser zoom
+                    levels (confirmed: names vanished at 90-100% zoom, only
+                    reappeared at 80%), so nothing here depends on either
+                    for its size — every value is a fixed number of pixels
+                    the browser can't collapse regardless of zoom. */}
+                <div className="flex h-20 shrink-0 flex-col justify-between gap-1 p-2.5">
                   <p
-                    className="line-clamp-2 min-h-7 text-[11px] font-medium leading-tight text-foreground"
+                    className="h-7 overflow-hidden text-[11px] font-medium leading-tight text-foreground"
                     title={product.name}
                   >
                     {product.name}
