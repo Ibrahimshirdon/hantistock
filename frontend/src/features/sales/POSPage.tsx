@@ -422,8 +422,11 @@ export function POSPage() {
                 </div>
 
                 {/* Info */}
-                <div className="flex flex-1 flex-col justify-between gap-1 p-2.5">
-                  <p className="line-clamp-2 text-[11px] font-medium leading-tight" title={product.name}>
+                <div className="flex min-h-13 flex-1 flex-col justify-between gap-1 p-2.5">
+                  <p
+                    className="line-clamp-2 min-h-7 text-[11px] font-medium leading-tight text-foreground"
+                    title={product.name}
+                  >
                     {product.name}
                   </p>
                   <div className="flex items-center justify-between gap-1 pt-1">
