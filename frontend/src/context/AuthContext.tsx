@@ -151,7 +151,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileLoadFailed, setProfileLoadFailed] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (rawUser) => {
+      let user = rawUser;
+      if (!user) {
+        // Two tabs of the same origin share one persisted session via
+        // IndexedDB — and a tab that's just sitting idle can still get an
+        // onAuthStateChanged callback with no user the moment a SIBLING tab
+        // concurrently reads/writes that same storage (observed: opening a
+        // second tab on an already-signed-in dashboard silently bounced the
+        // first tab to /login, with no reload and no user action in it at
+        // all). That's a storage-access race, not a real sign-out. Re-check
+        // the SDK's own in-memory current user a moment later before ever
+        // acting on a null callback; a genuine sign-out (or a tab that was
+        // never signed in to begin with) still ends up here correctly, just
+        // very slightly later.
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        user = firebaseAuth.currentUser;
+        if (user) return; // spurious — state already reflects this user, nothing to do.
+      }
       setFirebaseUser(user);
       if (user) {
         try {

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FirebaseError } from "firebase/app";
@@ -21,13 +21,25 @@ const FEATURES = [
 ];
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, profile, mfaSatisfied, loading } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation("auth");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // A safety net, not just the happy path: this page can be reached while
+  // already fully authenticated — a stale bookmark, the back button, or a
+  // momentary cross-tab auth flicker that self-corrected a beat after
+  // already navigating here (see AuthContext's onAuthStateChanged). Without
+  // this, any of those leaves the user stuck looking at a login form despite
+  // having a perfectly valid session.
+  useEffect(() => {
+    if (!loading && profile) {
+      navigate(mfaSatisfied ? ROLE_HOME_ROUTE[profile.role] : "/mfa-challenge", { replace: true });
+    }
+  }, [loading, profile, mfaSatisfied, navigate]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
