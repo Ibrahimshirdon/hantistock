@@ -342,7 +342,7 @@ export function POSPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex h-20 flex-col gap-2 p-2.5">
+                <div className="flex h-15 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
                   <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
                 </div>
@@ -377,7 +377,7 @@ export function POSPage() {
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
                     />
                   ) : (
@@ -427,21 +427,23 @@ export function POSPage() {
                     levels (confirmed: names vanished at 90-100% zoom, only
                     reappeared at 80%), so nothing here depends on either
                     for its size — every value is a fixed number of pixels
-                    the browser can't collapse regardless of zoom. */}
-                <div className="flex h-20 shrink-0 flex-col justify-between gap-1 p-2.5">
-                  <p
-                    className="h-7 overflow-hidden text-[11px] font-medium leading-tight text-foreground"
-                    title={product.name}
-                  >
-                    {product.name}
-                  </p>
-                  <div className="flex items-center justify-between gap-1 pt-1">
-                    <span className="text-sm font-bold tabular-nums text-primary">
+                    the browser can't collapse regardless of zoom. Plain
+                    truncate (single line, no -webkit-box) doesn't share
+                    that bug, so name and price sit on one row safely. */}
+                <div className="flex h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p
+                      className="min-w-0 flex-1 truncate text-[11px] font-medium text-foreground"
+                      title={product.name}
+                    >
+                      {product.name}
+                    </p>
+                    <span className="shrink-0 text-sm font-bold tabular-nums text-primary">
                       ${product.sellingPrice.toFixed(2)}
                     </span>
-                    <span className="text-[10px] tabular-nums text-muted-foreground">
-                      {product.totalStock} {product.unit}
-                    </span>
+                  </div>
+                  <div className="text-end text-[10px] tabular-nums text-muted-foreground">
+                    {product.totalStock} {product.unit}
                   </div>
                 </div>
               </div>
