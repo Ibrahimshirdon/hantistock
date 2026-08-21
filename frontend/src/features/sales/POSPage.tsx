@@ -337,7 +337,7 @@ export function POSPage() {
           />
           <ShiftSummaryDialog />
         </div>
-        <div className="grid grid-cols-2 gap-3 overflow-y-auto pe-1 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 overflow-y-auto pe-1 sm:grid-cols-3 xl:grid-cols-4">
           {productsLoading && (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
