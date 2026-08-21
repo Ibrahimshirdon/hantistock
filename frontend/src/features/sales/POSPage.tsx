@@ -363,10 +363,19 @@ export function POSPage() {
               <div
                 key={product.id}
                 className={cn(
-                  "group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-all duration-150",
+                  // No transform/transition-all here on purpose: confirmed via
+                  // a full-page text copy that the name/price text was
+                  // genuinely present in the DOM but not visually painted for
+                  // one user — a real, known Chrome GPU-compositing bug class
+                  // triggered by transform (scale) on an element that also
+                  // clips its content (overflow-hidden + rounded corners).
+                  // transition-colors only touches paint-only properties, so
+                  // there's nothing left here that forces this card onto a
+                  // composited layer.
+                  "group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-150",
                   outOfStock
                     ? "cursor-not-allowed opacity-50"
-                    : "cursor-pointer hover:border-primary/50 hover:shadow-md active:scale-[0.97]",
+                    : "cursor-pointer hover:border-primary/50 hover:shadow-md",
                   cartLine && "ring-2 ring-primary/70",
                 )}
                 onClick={() => !outOfStock && addToCart(product)}
@@ -377,7 +386,7 @@ export function POSPage() {
                     <img
                       src={product.images[0]}
                       alt={product.name}
-                      className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      className="size-full object-contain"
                       loading="lazy"
                     />
                   ) : (
