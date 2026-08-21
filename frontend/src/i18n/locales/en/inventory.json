@@ -83,6 +83,8 @@
     "approving": "Approving...",
     "approveProduct": "Approve product",
     "deleteProduct": "Delete product",
+    "deactivateProduct": "Deactivate product",
+    "activateProduct": "Activate product",
     "skuLabel": "SKU {{sku}}",
     "barcodeLabel": "· Barcode {{barcode}}",
     "costLabel": "Cost ${{value}}",
@@ -117,7 +119,9 @@
     "toasts": {
       "imageUploaded": "Image uploaded",
       "deleted": "Product deleted",
-      "approved": "Product approved — now live for sale"
+      "approved": "Product approved — now live for sale",
+      "deactivated": "Product deactivated — hidden from POS and the storefront",
+      "activated": "Product activated — visible again in POS and the storefront"
     }
   },
   "barcodePrintDialog": {

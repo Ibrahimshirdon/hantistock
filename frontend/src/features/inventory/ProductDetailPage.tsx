@@ -20,6 +20,7 @@ import {
   listBatchesForProduct,
   listCategories,
   listStockAdjustments,
+  updateProduct,
   uploadProductImage,
 } from "@/api/inventory.api";
 import { listTaxRates } from "@/api/sales.api";
@@ -165,6 +166,23 @@ export function ProductDetailPage() {
     onError: (error) => toast.error(getApiErrorMessage(error)),
   });
 
+  // Toggling isActive is the non-destructive alternative deleteStockWarning
+  // below already tells admins to use instead — an inactive product just
+  // stops showing up in POS/storefront listings (see product.service.ts's
+  // availableForSale filter) without touching its stock or history.
+  const toggleActiveMutation = useMutation({
+    mutationFn: () => updateProduct(productId, { isActive: !product!.isActive }),
+    onSuccess: () => {
+      toast.success(
+        product!.isActive
+          ? t("productDetailPage.toasts.deactivated")
+          : t("productDetailPage.toasts.activated"),
+      );
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error)),
+  });
+
   if (!product) {
     return <p className="text-muted-foreground">{t("common:actions.loading")}</p>;
   }
@@ -301,6 +319,20 @@ export function ProductDetailPage() {
                       taxRates={taxRates ?? []}
                       showExpiryField={!batches?.some((b) => b.expiryDate)}
                     />
+                  )}
+                  {(profile?.role === "admin" || profile?.role === "manager") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={toggleActiveMutation.isPending}
+                      onClick={() => toggleActiveMutation.mutate()}
+                    >
+                      {toggleActiveMutation.isPending
+                        ? t("common:actions.saving")
+                        : product.isActive
+                          ? t("productDetailPage.deactivateProduct")
+                          : t("productDetailPage.activateProduct")}
+                    </Button>
                   )}
                   {product.barcode && (
                     <BarcodePrintDialog product={product} />

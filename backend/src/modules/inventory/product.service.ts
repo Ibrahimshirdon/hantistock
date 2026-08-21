@@ -37,11 +37,14 @@ export async function listProducts(filters: {
   const products = snap.docs
     .map((d) => ({ id: d.id, ...d.data() }) as Product)
     .sort((a, b) => a.name.localeCompare(b.name));
-  // A product with no price set yet (sellingPrice 0), or a supplier
-  // submission still awaiting admin approval, shouldn't be purchasable —
-  // POS/storefront listings filter both out via this flag.
+  // A product with no price set yet (sellingPrice 0), a supplier submission
+  // still awaiting admin approval, or one an admin/manager has deliberately
+  // deactivated shouldn't be purchasable — POS/storefront listings filter
+  // all three out via this flag. isActive is otherwise stored but was never
+  // actually enforced anywhere, making the "deactivate instead of delete"
+  // hint on the delete-product dialog untrue until now.
   return filters.availableForSale
-    ? products.filter((p) => p.sellingPrice > 0 && p.approvalStatus === "approved")
+    ? products.filter((p) => p.sellingPrice > 0 && p.approvalStatus === "approved" && p.isActive)
     : products;
 }
 

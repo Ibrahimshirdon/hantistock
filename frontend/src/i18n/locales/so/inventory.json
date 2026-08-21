@@ -83,6 +83,8 @@
     "approving": "Waa la ansixinayaa...",
     "approveProduct": "Ansixi badeecada",
     "deleteProduct": "Tirtir badeecada",
+    "deactivateProduct": "Damin badeecada",
+    "activateProduct": "Shid badeecada",
     "skuLabel": "SKU {{sku}}",
     "barcodeLabel": "· Barcode {{barcode}}",
     "costLabel": "Qiimaha iibsiga ${{value}}",
@@ -117,7 +119,9 @@
     "toasts": {
       "imageUploaded": "Sawirka waa la geliyay",
       "deleted": "Badeecada waa la tirtiray",
-      "approved": "Badeecada waa la ansixiyay — hadda waa la iibin karaa"
+      "approved": "Badeecada waa la ansixiyay — hadda waa la iibin karaa",
+      "deactivated": "Badeecada waa la damiyay — kama muuqan doonto POS iyo dukaanka",
+      "activated": "Badeecada waa la shidey — mar kale ayay ka muuqan POS iyo dukaanka"
     }
   },
   "barcodePrintDialog": {

@@ -83,6 +83,8 @@
     "approving": "جارٍ الموافقة...",
     "approveProduct": "الموافقة على المنتج",
     "deleteProduct": "حذف المنتج",
+    "deactivateProduct": "إلغاء تفعيل المنتج",
+    "activateProduct": "تفعيل المنتج",
     "skuLabel": "رمز المنتج {{sku}}",
     "barcodeLabel": "· الباركود {{barcode}}",
     "costLabel": "التكلفة ${{value}}",
@@ -117,7 +119,9 @@
     "toasts": {
       "imageUploaded": "تم رفع الصورة",
       "deleted": "تم حذف المنتج",
-      "approved": "تمت الموافقة على المنتج — أصبح متاحًا للبيع الآن"
+      "approved": "تمت الموافقة على المنتج — أصبح متاحًا للبيع الآن",
+      "deactivated": "تم إلغاء تفعيل المنتج — لن يظهر في نقطة البيع أو المتجر",
+      "activated": "تم تفعيل المنتج — أصبح ظاهرًا مجددًا في نقطة البيع والمتجر"
     }
   },
   "barcodePrintDialog": {
