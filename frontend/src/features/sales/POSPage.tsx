@@ -340,7 +340,7 @@ export function POSPage() {
         <div className="grid grid-cols-2 gap-3 overflow-y-auto pe-1 sm:grid-cols-3 xl:grid-cols-4">
           {productsLoading && (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
+              <div key={i} className="flex min-h-44 flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-24 animate-pulse bg-muted" />
                 <div className="flex min-h-20 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
@@ -373,7 +373,20 @@ export function POSPage() {
                   // transition-colors only touches paint-only properties, so
                   // there's nothing left here that forces this card onto a
                   // composited layer.
-                  "group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-150",
+                  //
+                  // min-h-44 is load-bearing, not decorative: this card is a
+                  // CSS Grid item with overflow-hidden (needed so the image's
+                  // square corners don't poke out past rounded-xl), and a
+                  // grid item with any overflow other than visible gets its
+                  // "automatic minimum size" resolved to 0 instead of its
+                  // content's actual height. Without an explicit min-height
+                  // here, the grid was sizing this row shorter than the
+                  // card's own content (image h-24 + info min-h-20 = 176px)
+                  // and overflow-hidden quietly clipped the bottom of the
+                  // info section — exactly the "stock line half cut off"
+                  // symptom this was built to fix. 44 * 4px = 176px, matching
+                  // that sum; keep it in sync if either child's size changes.
+                  "group relative flex min-h-44 flex-col overflow-hidden rounded-xl border bg-card transition-colors duration-150",
                   outOfStock
                     ? "cursor-not-allowed opacity-50"
                     : "cursor-pointer hover:border-primary/50 hover:shadow-md",
