@@ -160,9 +160,17 @@
 }
 
 @media print {
-  /* 80mm thermal roll, portrait, auto height so the full receipt prints on one roll */
+  /* 80mm thermal roll, tall enough for any receipt to fit on one strip
+     without pagination. "portrait" here was invalid CSS and silently
+     dropped the whole declaration — the orientation keyword only pairs
+     with a named page-size (e.g. "A4 portrait"), not two explicit
+     lengths, which already fully determine the page's proportions on
+     their own. Confirmed via the parsed CSSOM: only margin was surviving
+     while size silently vanished, so the print dialog fell back to a
+     generic default paper size and Landscape instead of ever seeing this
+     rule at all. */
   @page {
-    size: 80mm 500mm portrait;
+    size: 80mm 500mm;
     margin: 4mm;
   }
   .receipt-torn-edge {
