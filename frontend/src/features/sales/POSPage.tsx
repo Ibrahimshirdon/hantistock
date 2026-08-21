@@ -341,10 +341,11 @@ export function POSPage() {
           {productsLoading && (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
-                <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex min-h-15 flex-col gap-2 p-2.5">
+                <div className="h-24 animate-pulse bg-muted" />
+                <div className="flex min-h-20 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-                  <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="h-3.5 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-2/5 animate-pulse rounded bg-muted" />
                 </div>
               </div>
             ))
@@ -380,8 +381,13 @@ export function POSPage() {
                 )}
                 onClick={() => !outOfStock && addToCart(product)}
               >
-                {/* Image */}
-                <div className="relative h-28 shrink-0 overflow-hidden bg-muted">
+                {/* Image — deliberately shorter than before (h-24, not
+                    h-28): the image was eating enough vertical space that
+                    at some font-size settings the info section below had
+                    nothing left to grow into inside the card's overall
+                    footprint. shrink-0 keeps it from ever being squeezed
+                    smaller by its sibling below, in either direction. */}
+                <div className="relative h-24 shrink-0 overflow-hidden bg-muted">
                   {product.images[0] ? (
                     <img
                       src={product.images[0]}
@@ -430,27 +436,36 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info — name on its own row, price (left) and stock
-                    (right) sharing the row below. Sizing stays rem-based
-                    (text-xs, no arbitrary px) and min-height (not a hard
-                    height) for the same reasons as before: consistent
-                    scaling with the browser's font size setting, and
-                    content can never be clipped. */}
-                <div className="flex min-h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
+                {/* Info — a permanent area below the image, never clipped:
+                    min-height (not a fixed/max height) means this section
+                    grows if it ever needs more room instead of hiding
+                    name/price/stock, at any zoom or font-size setting. Name
+                    truncates to one line — a deliberate, visible "..." for
+                    an unusually long name, not overflow silently deleting
+                    content — while price and stock always keep their own
+                    full line. Sizing is rem-based throughout (text-xs/
+                    text-sm, no raw px) so it scales consistently with the
+                    browser's own font-size setting rather than fighting it. */}
+                <div className="flex min-h-20 shrink-0 flex-col justify-center gap-1 p-2.5">
                   <p
                     className="truncate text-xs font-medium text-foreground"
                     title={product.name}
                   >
                     {product.name}
                   </p>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold tabular-nums text-primary">
-                      ${product.sellingPrice.toFixed(2)}
-                    </span>
-                    <span className="text-[0.6875rem] tabular-nums text-muted-foreground">
-                      {product.totalStock} {product.unit}
-                    </span>
-                  </div>
+                  <span className="text-sm font-bold tabular-nums text-primary">
+                    ${product.sellingPrice.toFixed(2)}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-xs font-medium tabular-nums",
+                      outOfStock ? "text-destructive" : lowStock ? "text-warning" : "text-muted-foreground",
+                    )}
+                  >
+                    {outOfStock
+                      ? t("common:status.outOfStock")
+                      : t("posPage.productCard.stock", { count: product.totalStock })}
+                  </span>
                 </div>
               </div>
             );

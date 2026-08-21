@@ -2,6 +2,9 @@
   "posPage": {
     "searchPlaceholder": "Iskaan barcode-ka ama raadi badeecadaha...",
     "inStock": "{{count}} {{unit}} ayaa kaydka ku jira",
+    "productCard": {
+      "stock": "Kaydka: {{count}}"
+    },
     "walkInCustomer": "Macmiil aan diiwaangashanayn",
     "cartEmpty": "Gaariga iibka waa madhan yahay",
     "eachPrice": "${{price}} mid kasta",

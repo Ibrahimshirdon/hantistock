@@ -2,6 +2,9 @@
   "posPage": {
     "searchPlaceholder": "مسح الباركود أو البحث عن المنتجات...",
     "inStock": "{{count}} {{unit}} متوفر في المخزون",
+    "productCard": {
+      "stock": "المخزون: {{count}}"
+    },
     "walkInCustomer": "عميل بدون حساب",
     "cartEmpty": "السلة فارغة",
     "eachPrice": "${{price}} للوحدة",

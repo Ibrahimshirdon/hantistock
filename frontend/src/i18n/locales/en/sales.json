@@ -2,6 +2,9 @@
   "posPage": {
     "searchPlaceholder": "Scan barcode or search products...",
     "inStock": "{{count}} {{unit}} in stock",
+    "productCard": {
+      "stock": "Stock: {{count}}"
+    },
     "walkInCustomer": "Walk-in customer",
     "cartEmpty": "Cart is empty",
     "eachPrice": "${{price}} each",
