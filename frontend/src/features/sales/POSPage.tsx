@@ -342,9 +342,9 @@ export function POSPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex min-h-13 flex-col items-center gap-1.5 p-2.5">
+                <div className="flex min-h-15 flex-col gap-2 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-                  <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
                 </div>
               </div>
             ))
@@ -430,24 +430,27 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info — name and price centered, stacked, nothing else.
-                    Sizing stays rem-based (text-xs/text-sm, no arbitrary px)
-                    and min-height (not a hard height) for the same reasons
-                    as before: consistent scaling with the browser's font
-                    size setting, and content can never be clipped. */}
-                <div className="flex min-h-19 shrink-0 flex-col items-center justify-center gap-0.5 p-2.5 text-center">
+                {/* Info — name on its own row, price (left) and stock
+                    (right) sharing the row below. Sizing stays rem-based
+                    (text-xs, no arbitrary px) and min-height (not a hard
+                    height) for the same reasons as before: consistent
+                    scaling with the browser's font size setting, and
+                    content can never be clipped. */}
+                <div className="flex min-h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
                   <p
-                    className="max-w-full truncate text-xs font-semibold text-foreground"
+                    className="truncate text-xs font-medium text-foreground"
                     title={product.name}
                   >
                     {product.name}
                   </p>
-                  <span className="text-xs font-semibold tabular-nums text-primary">
-                    ${product.sellingPrice.toFixed(2)}
-                  </span>
-                  <span className="text-[0.6875rem] tabular-nums text-muted-foreground">
-                    {product.totalStock} {product.unit}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-bold tabular-nums text-primary">
+                      ${product.sellingPrice.toFixed(2)}
+                    </span>
+                    <span className="text-[0.6875rem] tabular-nums text-muted-foreground">
+                      {product.totalStock} {product.unit}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
