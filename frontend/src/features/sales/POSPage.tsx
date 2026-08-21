@@ -342,9 +342,9 @@ export function POSPage() {
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col overflow-hidden rounded-xl border bg-card">
                 <div className="h-28 animate-pulse bg-muted" />
-                <div className="flex min-h-15 flex-col gap-2 p-2.5">
+                <div className="flex min-h-13 flex-col items-center gap-1.5 p-2.5">
                   <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-                  <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
                 </div>
               </div>
             ))
@@ -430,33 +430,21 @@ export function POSPage() {
                   )}
                 </div>
 
-                {/* Info — found it: an arbitrary text-[11px]/text-[10px]
-                    pixel value doesn't scale with Chrome's "Font size"
-                    setting, but the rem-based container around it does —
-                    confirmed the name/price reappeared the moment that
-                    setting was lowered to Small. Mixing a literal-px font
-                    size with a rem-based layout is exactly the kind of
-                    mismatch that setting can blow up into a full collapse.
-                    Using Tailwind's standard text-xs (rem-based, like
-                    everything else here) instead keeps it scaling in step
-                    with its container at any font-size setting, and
-                    min-height (not a hard height) means it still can't
-                    clip even if something else scales unevenly again. */}
-                <div className="flex min-h-15 shrink-0 flex-col justify-center gap-1 p-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <p
-                      className="min-w-0 flex-1 text-xs font-medium text-foreground"
-                      title={product.name}
-                    >
-                      {product.name}
-                    </p>
-                    <span className="shrink-0 text-sm font-bold tabular-nums text-primary">
-                      ${product.sellingPrice.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="text-end text-xs tabular-nums text-muted-foreground">
-                    {product.totalStock} {product.unit}
-                  </div>
+                {/* Info — name and price centered, stacked, nothing else.
+                    Sizing stays rem-based (text-xs/text-sm, no arbitrary px)
+                    and min-height (not a hard height) for the same reasons
+                    as before: consistent scaling with the browser's font
+                    size setting, and content can never be clipped. */}
+                <div className="flex min-h-13 shrink-0 flex-col items-center justify-center gap-0.5 p-2.5 text-center">
+                  <p
+                    className="max-w-full truncate text-xs font-semibold text-foreground"
+                    title={product.name}
+                  >
+                    {product.name}
+                  </p>
+                  <span className="text-xs font-semibold tabular-nums text-primary">
+                    ${product.sellingPrice.toFixed(2)}
+                  </span>
                 </div>
               </div>
             );
