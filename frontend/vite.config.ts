@@ -14,6 +14,20 @@ export default defineConfig({
       // checks on navigation, which left an already-open tab able to run
       // indefinitely against a build whose chunk files had been replaced.
       injectRegister: false,
+      // Explicit rather than relying on registerType: "autoUpdate" to imply
+      // these: a new service worker was still landing in the "installed but
+      // waiting" state for some users no matter how fast the update check
+      // ran, so a fix that had already shipped kept looking unfixed on
+      // their exact browser. skipWaiting activates a new worker the moment
+      // it finishes installing instead of waiting for every old tab to
+      // close first; clientsClaim then hands it control of already-open
+      // tabs immediately rather than only new ones; cleanupOutdatedCaches
+      // drops any stale precache left over from the worker it replaced.
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+      },
       // Precaches only the built app shell (JS/CSS/HTML/icons) so the app
       // is installable and can render offline — it does not intercept or
       // cache API/Firestore calls, since those go to a different origin

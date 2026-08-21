@@ -29,6 +29,16 @@ export function PwaUpdater() {
       // needRefresh below) on the very next load, not up to a minute later.
       registration.update();
       setInterval(() => registration.update(), UPDATE_CHECK_INTERVAL_MS);
+
+      // Background tabs get their timers throttled by the browser (often to
+      // once a minute or slower), so a tab left open — even one someone
+      // just switches back to after working in another tab for a while —
+      // can't rely on the interval above alone. Checking again the moment
+      // the tab actually becomes visible catches that case without waiting
+      // on a throttled timer.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") registration.update();
+      });
     },
   });
 
