@@ -435,7 +435,7 @@ export function POSPage() {
                     and min-height (not a hard height) for the same reasons
                     as before: consistent scaling with the browser's font
                     size setting, and content can never be clipped. */}
-                <div className="flex min-h-13 shrink-0 flex-col items-center justify-center gap-0.5 p-2.5 text-center">
+                <div className="flex min-h-19 shrink-0 flex-col items-center justify-center gap-0.5 p-2.5 text-center">
                   <p
                     className="max-w-full truncate text-xs font-semibold text-foreground"
                     title={product.name}
@@ -444,6 +444,9 @@ export function POSPage() {
                   </p>
                   <span className="text-xs font-semibold tabular-nums text-primary">
                     ${product.sellingPrice.toFixed(2)}
+                  </span>
+                  <span className="text-[0.6875rem] tabular-nums text-muted-foreground">
+                    {product.totalStock} {product.unit}
                   </span>
                 </div>
               </div>
