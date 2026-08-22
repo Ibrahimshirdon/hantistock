@@ -83,6 +83,18 @@
     "cancel": "Jooji",
     "errorCamera": "Ma heli kartid kaameerada — hubi fasaxa browser-ka"
   },
+  "mobileScannerPage": {
+    "title": "Habka Sawirka",
+    "statusStarting": "Kaameerada ayaa bilaabmaysa...",
+    "statusConnected": "La xiriiray",
+    "statusError": "Khalad kaameera",
+    "lastScanned": "Kii ugu dambeeyay ee la sawiray",
+    "waitingForScan": "Tusso kaameerada barcode-ka si loogu daro POS-kaaga",
+    "scanSuccess": "{{name}} waxaa loo diray POS-ka",
+    "scanNotFound": "Alaab lama helin barcode-kan: {{barcode}}",
+    "errorCamera": "Ma heli kartid kaameerada — hubi fasaxa browser-ka",
+    "signedInAs": "Waxaad ku gashan tahay sida {{name}}"
+  },
   "salesOrdersPage": {
     "title": "Dalabaadka Iibka",
     "subtitle": "Dhammaan macaamilladda iibka ee goobta (POS).",

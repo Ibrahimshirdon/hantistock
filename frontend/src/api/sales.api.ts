@@ -139,3 +139,26 @@ export async function listReturnsForOrder(orderId: string) {
   const { data } = await apiClient.get<ApiSuccess<SalesReturn[]>>(`/sales/orders/${orderId}/returns`);
   return data.data;
 }
+
+// Mobile POS scanning
+export interface ScanResult {
+  productId: string | null;
+  productName: string | null;
+  found: boolean;
+}
+
+export interface PendingScan {
+  barcode: string;
+  productId: string;
+  productName: string;
+}
+
+export async function submitScan(barcode: string) {
+  const { data } = await apiClient.post<ApiSuccess<ScanResult>>("/sales/scan", { barcode });
+  return data.data;
+}
+
+export async function listPendingScans() {
+  const { data } = await apiClient.get<ApiSuccess<PendingScan[]>>("/sales/scan/pending");
+  return data.data;
+}

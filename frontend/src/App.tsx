@@ -63,6 +63,7 @@ const SystemResetPage = lazy(() => import("@/features/security/SystemResetPage")
 const SalesReportPage = lazy(() => import("@/features/reports/SalesReportPage").then((m) => ({ default: m.SalesReportPage })));
 const InventoryReportPage = lazy(() => import("@/features/reports/InventoryReportPage").then((m) => ({ default: m.InventoryReportPage })));
 const AccountSettingsPage = lazy(() => import("@/features/account/AccountSettingsPage").then((m) => ({ default: m.AccountSettingsPage })));
+const MobileScannerPage = lazy(() => import("@/features/sales/MobileScannerPage").then((m) => ({ default: m.MobileScannerPage })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,6 +133,14 @@ export default function App() {
                   <Route path="settings/danger-zone" element={<SystemResetPage />} />
                   <Route path="account/settings" element={<AccountSettingsPage />} />
                 </Route>
+              </Route>
+
+              {/* Standalone mobile "Scanner Mode" — deliberately outside
+                  DashboardLayout since it is not another POS, just a
+                  full-screen camera scanner that reports scans to the
+                  existing desktop POS (see POSPage.tsx's pending-scans poll). */}
+              <Route element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]} />}>
+                <Route path="/scan" element={<MobileScannerPage />} />
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>

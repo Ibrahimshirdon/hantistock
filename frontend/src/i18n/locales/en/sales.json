@@ -83,6 +83,18 @@
     "cancel": "Cancel",
     "errorCamera": "Cannot access camera — check browser permissions"
   },
+  "mobileScannerPage": {
+    "title": "Scanner Mode",
+    "statusStarting": "Starting camera...",
+    "statusConnected": "Connected",
+    "statusError": "Camera error",
+    "lastScanned": "Last scanned",
+    "waitingForScan": "Point the camera at a barcode to add it to your POS cart",
+    "scanSuccess": "{{name}} sent to POS",
+    "scanNotFound": "No product found for barcode: {{barcode}}",
+    "errorCamera": "Cannot access camera — check browser permissions",
+    "signedInAs": "Signed in as {{name}}"
+  },
   "salesOrdersPage": {
     "title": "Sales Orders",
     "subtitle": "All point-of-sale transactions.",

@@ -28,6 +28,7 @@ const COLLECTIONS_TO_WIPE = [
   "loanRepayments",
   "notifications",
   "otherIncome",
+  "posScans",
   "products",
   "receipts",
   "salaries",

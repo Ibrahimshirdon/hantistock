@@ -6,7 +6,14 @@ import { useTranslation } from "react-i18next";
 import { Plus, Star, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProductByBarcode, listProducts } from "@/api/inventory.api";
-import { listTaxRates, createSalesOrder, previewDiscount, listSalesOrders, type CreateSalesOrderInput } from "@/api/sales.api";
+import {
+  listTaxRates,
+  createSalesOrder,
+  previewDiscount,
+  listSalesOrders,
+  listPendingScans,
+  type CreateSalesOrderInput,
+} from "@/api/sales.api";
 import { createDelivery } from "@/api/delivery.api";
 import { listUsers, getUser } from "@/api/auth.api";
 import { getApiErrorMessage } from "@/api/client";
@@ -191,6 +198,23 @@ export function POSPage() {
       if (timer) clearTimeout(timer);
     };
   }, []);
+
+  // Mobile scanner support: the mobile "Scanner Mode" page (see
+  // MobileScannerPage.tsx) posts each scan to the backend under the same
+  // staff account, then this POS polls for and consumes them here — reusing
+  // the exact same onCameraScan pipeline as the on-page camera/physical
+  // scanner, so cart behavior, toasts, and inventory are unaffected.
+  const { data: pendingScans } = useQuery({
+    queryKey: ["posScans", "pending"],
+    queryFn: listPendingScans,
+    refetchInterval: 2000,
+  });
+
+  useEffect(() => {
+    pendingScans?.forEach((scan) => {
+      onCameraScanRef.current(scan.barcode);
+    });
+  }, [pendingScans]);
 
   const { data: selectedCustomerFull } = useQuery({
     queryKey: ["user", customerId],

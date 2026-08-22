@@ -83,6 +83,18 @@
     "cancel": "إلغاء",
     "errorCamera": "لا يمكن الوصول إلى الكاميرا — تحقق من أذونات المتصفح"
   },
+  "mobileScannerPage": {
+    "title": "وضع الماسح الضوئي",
+    "statusStarting": "جارٍ تشغيل الكاميرا...",
+    "statusConnected": "متصل",
+    "statusError": "خطأ في الكاميرا",
+    "lastScanned": "آخر عملية مسح",
+    "waitingForScan": "وجّه الكاميرا نحو الباركود لإضافته إلى نقطة البيع",
+    "scanSuccess": "تم إرسال {{name}} إلى نقطة البيع",
+    "scanNotFound": "لم يتم العثور على منتج لهذا الباركود: {{barcode}}",
+    "errorCamera": "لا يمكن الوصول إلى الكاميرا — تحقق من أذونات المتصفح",
+    "signedInAs": "مسجل الدخول باسم {{name}}"
+  },
   "salesOrdersPage": {
     "title": "طلبات المبيعات",
     "subtitle": "جميع معاملات نقطة البيع.",
