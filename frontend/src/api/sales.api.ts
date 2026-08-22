@@ -144,6 +144,7 @@ export async function listReturnsForOrder(orderId: string) {
 export interface ScanResult {
   productId: string | null;
   productName: string | null;
+  unitPrice: number | null;
   found: boolean;
 }
 

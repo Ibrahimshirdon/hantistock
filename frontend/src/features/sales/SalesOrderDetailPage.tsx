@@ -555,7 +555,7 @@ function DeliveryCard({
 // kept visible on screen as a preview of exactly what `window.print()` will
 // produce, since it's the only thing left unhidden by print:hidden above
 // (and by DashboardLayout's own print:hidden sidebar/header).
-function ReceiptPaper({
+export function ReceiptPaper({
   order,
   receipt,
   returns,

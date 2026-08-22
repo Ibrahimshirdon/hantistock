@@ -93,7 +93,13 @@
     "scanSuccess": "{{name}} sent to POS",
     "scanNotFound": "No product found for barcode: {{barcode}}",
     "errorCamera": "Cannot access camera — check browser permissions",
-    "signedInAs": "Signed in as {{name}}"
+    "signedInAs": "Signed in as {{name}}",
+    "cartTitle": "Scanned items",
+    "cartEmptyMobile": "No items scanned yet",
+    "completeSale": "Complete sale — ${{total}}",
+    "completing": "Completing sale...",
+    "saleCompleted": "Sale completed — {{orderNumber}}",
+    "newSale": "New sale"
   },
   "salesOrdersPage": {
     "title": "Sales Orders",

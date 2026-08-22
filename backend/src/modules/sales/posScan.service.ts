@@ -20,7 +20,7 @@ export async function createScan(barcode: string, actor: AuthenticatedUser) {
   try {
     product = await getProductByBarcode(barcode);
   } catch {
-    return { productId: null, productName: null, found: false };
+    return { productId: null, productName: null, unitPrice: null, found: false };
   }
 
   await collection().add({
@@ -31,7 +31,7 @@ export async function createScan(barcode: string, actor: AuthenticatedUser) {
     createdAt: FieldValue.serverTimestamp(),
   });
 
-  return { productId: product.id, productName: product.name, found: true };
+  return { productId: product.id, productName: product.name, unitPrice: product.sellingPrice, found: true };
 }
 
 // Polled by the desktop POS every couple of seconds while it's open (see

@@ -93,7 +93,13 @@
     "scanSuccess": "{{name}} waxaa loo diray POS-ka",
     "scanNotFound": "Alaab lama helin barcode-kan: {{barcode}}",
     "errorCamera": "Ma heli kartid kaameerada — hubi fasaxa browser-ka",
-    "signedInAs": "Waxaad ku gashan tahay sida {{name}}"
+    "signedInAs": "Waxaad ku gashan tahay sida {{name}}",
+    "cartTitle": "Alaabta la sawiray",
+    "cartEmptyMobile": "Weli wax alaab ah lama sawirin",
+    "completeSale": "Dhammaystir iibka — ${{total}}",
+    "completing": "Iibka ayaa la dhammaystirayaa...",
+    "saleCompleted": "Iibka waa la dhammaystiray — {{orderNumber}}",
+    "newSale": "Iib cusub"
   },
   "salesOrdersPage": {
     "title": "Dalabaadka Iibka",

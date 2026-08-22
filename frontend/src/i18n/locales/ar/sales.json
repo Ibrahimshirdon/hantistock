@@ -93,7 +93,13 @@
     "scanSuccess": "تم إرسال {{name}} إلى نقطة البيع",
     "scanNotFound": "لم يتم العثور على منتج لهذا الباركود: {{barcode}}",
     "errorCamera": "لا يمكن الوصول إلى الكاميرا — تحقق من أذونات المتصفح",
-    "signedInAs": "مسجل الدخول باسم {{name}}"
+    "signedInAs": "مسجل الدخول باسم {{name}}",
+    "cartTitle": "المنتجات الممسوحة",
+    "cartEmptyMobile": "لم يتم مسح أي منتجات بعد",
+    "completeSale": "إتمام البيع — ${{total}}",
+    "completing": "جارٍ إتمام البيع...",
+    "saleCompleted": "تم إتمام البيع — {{orderNumber}}",
+    "newSale": "بيع جديد"
   },
   "salesOrdersPage": {
     "title": "طلبات المبيعات",
