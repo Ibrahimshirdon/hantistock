@@ -76,6 +76,14 @@
       "noOrders": "Maanta dalabaad la dhammaystirin kuma jiro."
     }
   },
+  "mobileScannerLink": {
+    "button": "Sawirka mobilada",
+    "title": "Ka sawir taleefankaaga",
+    "instructions": "Furfur linkan taleefankaaga, ku gal isla akoonka, oo ogolow gelitaanka kaameerada si aad u bilowdo sawirka.",
+    "copy": "Koobiyee linkiga",
+    "copied": "Linkiga waa la koobiyeeyay",
+    "copyFailed": "Lama koobiyeen — gacanta ku koobiyee linkiga"
+  },
   "cameraScanner": {
     "trigger": "Sawir barcode",
     "title": "Sawir barcode",

@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ShiftSummaryDialog } from "./ShiftSummaryDialog";
+import { MobileScannerLinkDialog } from "./MobileScannerLinkDialog";
 
 const POINTS_PER_DOLLAR = 100;
 
@@ -360,6 +361,9 @@ export function POSPage() {
             }}
           />
           <ShiftSummaryDialog />
+          <div className="hidden md:block">
+            <MobileScannerLinkDialog />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3 overflow-y-auto pe-1 sm:grid-cols-3 xl:grid-cols-4">
           {productsLoading && (

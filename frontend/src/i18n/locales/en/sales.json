@@ -76,6 +76,14 @@
       "barcodeNotFound": "No product found for barcode: {{barcode}}"
     }
   },
+  "mobileScannerLink": {
+    "button": "Mobile scanner",
+    "title": "Scan from your phone",
+    "instructions": "Open this link on your phone, sign in with the same account, and allow camera access to start scanning.",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "copyFailed": "Could not copy — copy the link manually"
+  },
   "cameraScanner": {
     "trigger": "Scan with camera",
     "title": "Scan barcode",
